@@ -1,7 +1,9 @@
-# DIP/training/cellpose_training — Cellpose-crop training runs
+# DIP/training/cellpose_training — Rejected Cellpose-crop experiment
 
-Parallel EfficientNet-B0 experiments that use Cellpose crops (PNGs from
-`DIP/DATA_CELLPOSE/`) instead of the full original images.
+EfficientNet-B0 experiments that use Cellpose crops (PNGs from
+`DIP/DATA_CELLPOSE/`) instead of the full original images. These runs were an
+attempt to improve classification; they lost to the full-image model and are
+evidence only, not integrated into the deployment.
 
 ## Contents
 
@@ -29,8 +31,9 @@ Parallel EfficientNet-B0 experiments that use Cellpose crops (PNGs from
 
 ## Status
 
-**DONE (experiment).** Cellpose crops did **not** beat the best full-image
-model (macro-F1 0.7144), so Cellpose is not on the final model's critical path.
+**DONE (rejected experiment).** Cellpose crops did **not** beat the best
+full-image model (macro-F1 0.7144), so Cellpose is not on the final model's
+critical path and is **not integrated** into the app, edge model, or CN path.
 
 ## Pending / balance
 

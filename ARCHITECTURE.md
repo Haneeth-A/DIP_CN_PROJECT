@@ -1,42 +1,46 @@
 # Architecture
 
-This project has three runtime paths that share the same 13-class label space
-and the same WBCBench images:
+This project has two deployed runtime paths that share the same 13-class label
+space and the same WBCBench images:
 
 1. **DIP classifier** — full-image EfficientNet-B0, evaluated offline and
    exported to ONNX.
 2. **Edge + CN offloading** — INT8 local inference and optional fog inference
    over a reliable TCP transport, with a learned routing policy.
-3. **Cellpose (optional)** — segmentation and crop analysis; not used by the
-   selected classifier.
+
+Cellpose is **not a runtime path**. It was an exploratory experiment to see
+whether segmentation-based crops could improve classification; the experiment
+produced a negative result and is documented only as evidence.
 
 ## System overview
 
 ```text
                          WBCBench 2026 images
                                   │
-                       ┌──────────┴──────────┐
-                       │                     │
-                 DIP training            Cellpose
-                       │                     │
-          manifests + quality          masks + crops
-                       │                     │
-             EfficientNet-B0          crop classifier
-                       │              (not selected)
-          ┌────────────┴────────────┐
-          │                         │
-   PyTorch checkpoints         ONNX export
-          │                         │
-   fog ensemble (FP32)       INT8 edge model
-          │                         │
-          └────────────┬────────────┘
-                       │
-              CN routing policy
-             (local vs offload)
-                       │
-              TCP transport + fog
-                       │
-                 prediction result
+                          DIP training
+                                  │
+                     manifests + quality features
+                                  │
+                          EfficientNet-B0
+                                  │
+                 ┌────────────────┴────────────────┐
+                 │                                 │
+        PyTorch checkpoints                 ONNX export
+                 │                                 │
+        fog ensemble (FP32)                 INT8 edge model
+                 │                                 │
+                 └────────────────┬────────────────┘
+                                  │
+                         CN routing policy
+                        (local vs offload)
+                                  │
+                         TCP transport + fog
+                                  │
+                            prediction result
+
+Cellpose experiment (not deployed)
+  images → CPSAM masks/crops → crop classifier
+  best crop macro-F1 0.7067 < 0.7144 full-image → rejected
 ```
 
 ## 1. DIP classifier
@@ -145,16 +149,21 @@ Key results (500-image eval split):
 Real-TCP validation: 20/20 requests, 100% SHA-256 integrity, 100% agreement with
 direct fog inference. `phase2_test` is not used by the CN component.
 
-## 4. Cellpose (optional)
+## 4. Cellpose exploratory experiment (not integrated)
+
+Cellpose was evaluated only to test whether segmentation-based crops would
+improve the classifier. It is **not** part of the deployed architecture and is
+not an application integration target.
 
 - Model: Cellpose 4.2.1.1 `cpsam`, `diameter=None`,
   `cellprob_threshold=0.0`, largest object selected, 20 px crop padding.
-- Output: 68,782 masks/crops (`phase2_eval`/`phase2_test` outputs excluded by
-  the QA gate).
+- Output: 68,782 masks/crops in a full-dataset run (`phase2_eval`/`phase2_test`
+  outputs excluded by the QA gate).
 - QA: 68,735 `ok`, 47 `no_object`, 0 missing/extra/zero-byte.
 - Classifier experiment: Cellpose crops used as input; best crop model reached
-  0.7067 macro-F1, below the 0.7144 full-image model. Cellpose is therefore not
-  in the selected deployment path.
+  0.7067 macro-F1, below the 0.7144 full-image model.
+- Decision: experiment closed as a negative result; no Cellpose integration is
+  planned for the app, edge model, or CN path.
 
 ## Invariants and constraints
 

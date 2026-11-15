@@ -113,7 +113,7 @@ design.
 | Submission INT8 wrapper | `model_share/deploy/predict.py` |
 | CN policy | `CN/results/cn_edge_fog/policy_tree.joblib` |
 | CN results | `CN/results/cn_edge_fog/` |
-| Cellpose outputs | `DIP/DATA_CELLPOSE/` |
+| Cellpose experiment outputs | `DIP/DATA_CELLPOSE/` (evidence only; not integrated) |
 | DIP submission snapshot | GitHub Release asset `v1.0.0` (checksum in `DIP/`) |
 | Archive index | `DUMP/ARCHIVE_INDEX.md` |
 
@@ -168,8 +168,11 @@ Checkpoint keys include `model_state`, `optimizer_state`, `epoch`,
 - The selected final predictor is the equal-weight top-3 ensemble with 8-view
   TTA; the INT8 edge model is the fast single-model path.
 - Do not use `phase2_test` for application tuning or demos.
-- Quality features and Cellpose are optional for the app. The selected
-  classifier does not require them.
+- Quality features are optional for the app. The selected classifier does not
+  require them.
+- Cellpose is **not** an integration target. It was evaluated as an experiment,
+  produced a negative result, and must not be wired into the app, edge model, or
+  CN path.
 
 ## Gotchas
 
@@ -192,24 +195,19 @@ Checkpoint keys include `model_state`, `optimizer_state`, `epoch`,
 
 ## Git status
 
-The project root is **not** a Git repository. `DIP/.git` is a stale nested
-repository that tracks an older layout; it shows many deletions and is not the
-source of truth. Do not commit from it or rewrite its history without a plan.
+The project root is the Git repository, pushed to
+`https://github.com/HaneethAlla/DIP_CN_PROJECT`. The old remote `main` is
+preserved at `975b10878e2685373f5b7974c0813c300d691093` on branch
+`backup/main-before-upload-20261115` and tag `pre-upload-main-20261115`.
 
-Recommended Git alignment when the team is ready:
-
-1. Create a fresh repository at the project root (or replace the stale history
-   deliberately).
-2. Add a root `.gitignore` covering at least:
-   `.venv/`, `.venv-*/`, `__pycache__/`, `*.pyc`, `.pytest_cache/`, `DATA/`,
-   `DIP/DATA_CELLPOSE/`, `DIP/training/checkpoints/`,
-   `DIP/training/cellpose_training/`, `DIP/training/logs/`,
-   `DIP/cellpose/{pilot,pilot_complete_results,_archives}/`, `*.pt`, `*.pth`,
-   `DIP/DIP_WBC_2026_submission.zip`, `DUMP/`.
-3. Commit code, docs, manifests, ONNX models, and derived results; exclude raw
-   data and checkpoints.
-4. Keep the verified submission zip in the release/artifacts channel, not in
-   normal source control.
+- `main` contains the imported project tree.
+- The nested `DIP/.git` was archived and removed before import; it is not a
+  source of truth.
+- The root `.gitignore` excludes raw data, venvs, checkpoints, Cellpose
+  experiment outputs, runtime logs, and the submission ZIP.
+- Keep the verified submission ZIP in the GitHub Release (`v1.0.0`), not in
+  normal source control.
+- Do not rewrite or delete the backup branch/tag.
 
 ## Remaining work (application excluded)
 
@@ -224,7 +222,9 @@ pipeline/report work is:
 4. Rare-class rescue heads (PC/PLY/BNE/MMY/VLY), starting from `DIP/next.txt`.
 5. Clean batch/LR ablation and seed-variance runs.
 6. Device/phone latency benchmark for the INT8 model.
-7. Optional Cellpose crop inference in the application.
+
+Cellpose integration is **not** remaining work: the crop experiment was rejected
+and is evidence only.
 
 ## Handover checklist
 

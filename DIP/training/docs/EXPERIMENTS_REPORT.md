@@ -604,10 +604,11 @@ Each run stores `config.yaml`, `history.csv`, `best_metrics.json`, and the best/
 ## 11. Limitations and risks
 
 > **Outdated items:** Item 2 is done (`phase2_test` evaluated; see
-> `../results/test_final/`). Item 8 is done (CN transport/policy/demos
-> implemented). Item 9 remains out of scope for this handover (Streamlit
-> integration is a separate application task). Items 1, 3, 4, 5, and 10 still
-> apply.
+> `../results/test_final/`). Item 7 is closed: Cellpose was tested and rejected,
+> and it is not integrated or planned future work. Item 8 is done (CN
+> transport/policy/demos implemented). Item 9 remains out of scope for this
+> handover (Streamlit integration is a separate application task). Items 1, 3,
+> 4, 5, and 10 still apply.
 
 1. **Patient-level leakage is unverified.** HF metadata is not downloaded. Use `patient_hash` to check splits before claiming generalization.
 2. **Final test set not evaluated.** All current numbers are on `phase2_eval`. Run `phase2_test` once at the end.
@@ -615,7 +616,7 @@ Each run stores `config.yaml`, `history.csv`, `best_metrics.json`, and the best/
 4. **Rare-class bottleneck.** BNE/MMY/VLY/MY remain weak; likely visual overlap/label ambiguity, not only imbalance.
 5. **PLY/PC instability.** PLY has 1 eval / 2 test images; PC has 32 eval / 12 test images. Macro-F1 is unstable because of this.
 6. **No GAN.** Deliberate decision: time/risk; augmentation and loss rebalancing are the chosen tools.
-7. **Cellpose is optional and not on the critical path.** If masks are not ready, ship without it and document as future work.
+7. **Cellpose experiment rejected.** Cellpose crops were tested and did not beat the full-image model; Cellpose is not integrated and is not future work.
 8. **CN server/client and demos are not implemented yet.** Only `protocol.py` exists.
 9. **Streamlit app is not integrated with the model yet.**
 10. **No `--resume`.** Checkpoints do not save scheduler/scaler/RNG state; exact continuation needs code changes.

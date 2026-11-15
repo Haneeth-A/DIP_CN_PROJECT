@@ -1,5 +1,10 @@
 # WBC DIP–CN Project — Full Plan Report
 
+> **Historical planning note:** Cellpose was later evaluated as an experiment,
+> produced a negative result, and is **not integrated** into the app, edge model,
+> or CN path. Any optional/integration wording below is obsolete. See
+> `../../IMPLEMENTATION_STATUS.md` and `../../ARCHITECTURE.md`.
+
 **Project:** 13-Class White Blood Cell Classification for Cancer Screening
 **Dataset:** WBCBench 2026 (`Xin-Tian/wbcbench2026`)
 **Courses:** Digital Image Processing + Computer Networks

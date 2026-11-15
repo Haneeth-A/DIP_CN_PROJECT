@@ -17,7 +17,7 @@ the Streamlit application shell.
 | `logs/` | Training and probability-export logs |
 | `docs/` | Long-form experiments/viva report |
 | `tests/` | Quality-feature unit tests |
-| `cellpose_training/` | Parallel run using Cellpose crops as input |
+| `cellpose_training/` | Rejected Cellpose-crop experiment (evidence only) |
 | `requirements.txt` | Python dependencies |
 | `run_queue.sh` | Experiment queue runner |
 
@@ -34,8 +34,8 @@ the Streamlit application shell.
 - Seven quality-feature tests pass.
 
 **OUT OF SCOPE (application).** `app.py` only validates and previews an uploaded
-image. Quality features, model inference, top-3 display, and Cellpose overlays
-are not connected.
+image. Quality features, model inference, and top-3 display are not connected.
+Cellpose is not integrated and is not a planned application feature.
 
 ## Results
 

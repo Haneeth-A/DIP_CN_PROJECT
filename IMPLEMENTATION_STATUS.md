@@ -9,6 +9,8 @@ Status vocabulary:
 - **IN PROGRESS** — actively being produced.
 - **PENDING** — not started or not finished.
 - **OUT OF SCOPE** — intentionally excluded from this handover.
+- **REJECTED** — evaluated, produced a negative result, and is excluded from the
+  architecture and future integration.
 - **ARCHIVED** — preserved in `DUMP/`; not on the critical path.
 
 ## Component ledger
@@ -25,8 +27,8 @@ Status vocabulary:
 | INT8 quantization | DONE | `models/edge_quant/`, `model_share/` | — |
 | Deployment packaging | DONE | `model_share/` + checksums | Device/phone benchmark not recorded |
 | Cellpose pilot | DONE | `DIP/cellpose/pilot_complete_results/` | No expert ground-truth masks |
-| Cellpose full run | DONE | 68,782 outputs, QA gate passed | Not used by the selected classifier |
-| Cellpose-in-classifier | DONE (negative result) | Best crop model 0.7067 vs 0.7144 full-image | Not selected |
+| Cellpose full run | DONE | 68,782 outputs, QA gate passed | Experiment evidence only; not integrated |
+| Cellpose-in-classifier | REJECTED | Best crop model 0.7067 vs 0.7144 full-image | Not selected; no integration planned |
 | CN TCP transport | DONE | `CN/src/cn/{protocol,client,server}.py` | — |
 | CN edge–fog policy | DONE | `CN/src/cn/edge/`, `CN/results/cn_edge_fog/` | Analytic network model; no packet loss |
 | CN validation / demo | DONE | 20/20 real-TCP requests, 100% integrity | Demo, not a unit test |
@@ -41,7 +43,7 @@ Status vocabulary:
 | Research paper | PENDING | `DUMP/historical_docs/PROJECT_PLAN.md` outline | — |
 | PPT | PENDING | `DUMP/historical_docs/PROJECT_PLAN.md` outline | — |
 | Faculty demo | PENDING | — | Required by the course checklist |
-| Git repository alignment | PENDING | `DIP/.git` tracks an older layout | Commit the current tree; exclude data/venvs |
+| Git repository alignment | DONE | Root repo at GitHub; old `main` preserved in backup branch/tag | — |
 
 ## 5-fold cross-validation
 
@@ -82,7 +84,7 @@ From `to do .txt`:
 
 | Deliverable | Status | Notes |
 |---|---|---|
-| Complete project (deployment + repository) | PARTIAL | Model/edge/CN complete; Streamlit integration out of scope; GitHub needs alignment |
+| Complete project (deployment + repository) | PARTIAL | Model/edge/CN complete; GitHub aligned; Streamlit integration out of scope |
 | Project report | PENDING | DIP report exists inside the submission zip; consolidated report not written |
 | Research paper | PENDING | Outline in `DUMP/historical_docs/PROJECT_PLAN.md` |
 | PPT | PENDING | Outline in `DUMP/historical_docs/PROJECT_PLAN.md`; CN slides exist |
@@ -91,16 +93,13 @@ From `to do .txt`:
 ## Pending backlog (priority order)
 
 1. **Faculty demo** of the complete deployment (course requirement).
-2. **GitHub cleanup**: make the repository match this tree; exclude `.venv*`,
-   `DATA/`, `DIP/DATA_CELLPOSE/`, checkpoints, results, and the venv.
-3. **Report**, **research paper**, **PPT** (outlines in
+2. **Report**, **research paper**, **PPT** (outlines in
    `DUMP/historical_docs/PROJECT_PLAN.md`).
-4. **Patient-level leakage check** via Hugging Face metadata.
-5. **Rare-class rescue**: PC/PLY override heads, BNE-vs-SNE binary head.
-6. **Batch/LR ablation** (clean 224/32 at 5e-4 vs 224/64 at 3e-4).
-7. **Seed variance** (2–3 seeds, mean ± std).
-8. **Optional Cellpose inference ablation** in the app (out of scope here).
-9. **Device/phone latency benchmark** for the INT8 model.
+3. **Patient-level leakage check** via Hugging Face metadata.
+4. **Rare-class rescue**: PC/PLY override heads, BNE-vs-SNE binary head.
+5. **Batch/LR ablation** (clean 224/32 at 5e-4 vs 224/64 at 3e-4).
+6. **Seed variance** (2–3 seeds, mean ± std).
+7. **Device/phone latency benchmark** for the INT8 model.
 
 ## Out of scope for this handover
 
@@ -109,8 +108,10 @@ the completed pipeline:
 
 - Streamlit integration: upload → quality features → degradation type →
   `predict()` → class/confidence/top-3.
-- Optional Cellpose overlay in the app.
 - Degradation-aware routing in the UI.
+
+Cellpose is **not** an application task: the crop experiment was rejected and no
+integration is planned.
 
 ## Archived material
 

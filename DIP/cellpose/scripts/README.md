@@ -15,8 +15,8 @@
 
 ## Status
 
-**DONE.** Production scripts produced `DIP/DATA_CELLPOSE/`; QA and equivalence
-checks pass.
+**DONE (experiment evidence).** These scripts produced `DIP/DATA_CELLPOSE/`;
+QA and equivalence checks pass. They are not runtime/integration code.
 
 ## Pending / balance
 

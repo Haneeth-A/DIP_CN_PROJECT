@@ -55,19 +55,21 @@ images. Authority levels:
 | `docs/EXPERIMENTS_REPORT.md` | SUPPORT | Historical long-form report (annotated) |
 | `tests/test_features.py` | ACTIVE | Nine quality-feature tests |
 | `app.py` | SUPPORT | Streamlit shell; inference not wired (out of scope) |
-| `cellpose_training/` | EVIDENCE | Cellpose-crop classifier experiments |
+| `cellpose_training/` | EVIDENCE | Rejected Cellpose-crop classifier experiment |
 
-## DIP Cellpose — `DIP/cellpose/` and `DIP/DATA_CELLPOSE/`
+## DIP Cellpose experiment — `DIP/cellpose/` and `DIP/DATA_CELLPOSE/`
+
+Rejected experiment; evidence only. Not part of the deployed architecture.
 
 | Path | Level | Purpose |
 |---|---|---|
-| `DIP/cellpose/scripts/` | ACTIVE | Pilot/production segmentation scripts |
+| `DIP/cellpose/scripts/` | EVIDENCE | Experiment segmentation scripts (not runtime code) |
 | `DIP/cellpose/reports/` | EVIDENCE | QA, IoU, batch-equivalence, run summaries |
 | `DIP/cellpose/pilot/` | EVIDENCE | 100-image pilot outputs |
 | `DIP/cellpose/pilot_complete_results/` | EVIDENCE | Supplied complete pilot snapshot |
 | `DIP/cellpose/source_package/` | SUPPORT | Frozen source snapshot (read-only) |
 | `DIP/cellpose/docs/` | SUPPORT | Pilot README and requirements |
-| `DIP/DATA_CELLPOSE/` | EVIDENCE | Full 68,782-image segmentation output (dataset-derived) |
+| `DIP/DATA_CELLPOSE/` | EVIDENCE | Full 68,782-image Cellpose experiment output (dataset-derived) |
 
 ## CN — `CN/`
 

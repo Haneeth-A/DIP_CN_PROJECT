@@ -10,9 +10,10 @@
 - **Repository:** https://github.com/HaneethAlla/DIP_CN_PROJECT
 
 > **Handover scope.** The model, edge deployment, CN transport/offloading
-> system, Cellpose experiments, and evidence package are complete. The
-> Streamlit application integration is **out of scope for this handover** and
-> is the next developer's task. Start with
+> system, and evidence package are complete. Cellpose was evaluated as a
+> segmentation-based improvement but produced a negative result; it is **not
+> integrated**. The Streamlit application integration is **out of scope for this
+> handover** and is the next developer's task. Start with
 > [`DEVELOPER_HANDOVER.md`](DEVELOPER_HANDOVER.md).
 
 ## Read in this order
@@ -37,13 +38,13 @@
 | Edge deployment | DONE | INT8 ONNX, PyTorch-free wrapper, latency benchmark |
 | CN transport | DONE | TCP framing, SHA-256 integrity, ACK/retransmit, threaded server |
 | CN edge–fog policy | DONE | Learned local/offload policy, 500-image matrix, real-TCP validation |
-| Cellpose | DONE (optional) | Pilot + full 68,782-image run; crops did not beat full images |
+| Cellpose experiment | NEGATIVE RESULT | Pilot + full run done; crops underperformed full images; not integrated |
 | Quality features | DONE | 7 features, manifests, severity analysis |
 | 5-fold CV | DONE | All 5 image-level folds (training-pool only; not patient-safe) |
 | Streamlit application | **OUT OF SCOPE** | Upload/preview shell only; inference not wired |
 | Report / paper / PPT | **PENDING** | Outlines exist in `DUMP/historical_docs/PROJECT_PLAN.md` |
 | Faculty demo | **PENDING** | Required by the course checklist |
-| Git alignment | **PENDING** | `DIP/.git` still tracks an older layout |
+| Git alignment | DONE | Root repo pushed; old `main` preserved in backup branch/tag |
 
 ## Main results
 
@@ -64,8 +65,10 @@
 - **5-fold CV:** mean macro-F1 0.8461 ± 0.0114 on held-out folds of the
   training pool. This is **not comparable** to `phase2_eval`/`phase2_test`
   because it validates on training-distribution images.
-- **Cellpose:** 68,782 outputs (68,735 `ok`, 47 `no_object`, QA gate passed).
-  The best Cellpose-crop classifier reached 0.7067, below the full-image model.
+- **Cellpose experiment:** 68,782 outputs (68,735 `ok`, 47 `no_object`, QA gate
+  passed). The best Cellpose-crop classifier reached 0.7067, below the 0.7144
+  full-image model. It is a negative result and is **not integrated** into the
+  app, edge model, or CN path.
 
 ## Quick start
 
@@ -98,7 +101,7 @@ cd model_share/deploy
 | Path | Contents |
 |---|---|
 | `DATA/` | Raw WBCBench JPEGs, 101,716 images (not redistributable) |
-| `DIP/` | DIP pipeline: training, Cellpose, quality features, app shell |
+| `DIP/` | DIP pipeline: training, quality features, Cellpose evidence, app shell |
 | `CN/` | TCP transport and edge–fog offloading system |
 | `models/` | Canonical INT8/FP32 ONNX models and Phase B evaluation |
 | `model_share/` | Curated deployment/handoff bundle |
@@ -122,5 +125,3 @@ leakage is unverified.
 - Batch/LR ablation and seed-variance study are incomplete.
 - Report, research paper, and PPT are not written.
 - Device/phone latency benchmarking is not recorded.
-- The nested `DIP/.git` tracks an older layout; see
-  [`DEVELOPER_HANDOVER.md`](DEVELOPER_HANDOVER.md#git-status).

@@ -8,6 +8,6 @@
 | `validate_batch_equivalence.py` | Compare batched vs unbatched results |
 | `validate_pilot_iou.py` | Pilot IoU repeatability |
 
-**Status:** DONE. Used for the 68,782-image run.
+**Status:** DONE (experiment). Used for the 68,782-image run; not integrated.
 
 **Pending:** none; keep for reproducibility.

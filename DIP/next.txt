@@ -34,7 +34,4 @@ Do not repeat
 - More PLY runs: one unique eval cell.
 - More TTA: already full.
 - Tuning on the test set: use phase2_eval for all decisions
--
--
--
-- and cellpose
+- Cellpose integration: experiment rejected (best crop 0.7067 < 0.7144 full-image); do not integrate.

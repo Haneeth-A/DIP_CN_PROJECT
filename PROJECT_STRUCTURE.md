@@ -16,7 +16,7 @@ Project_DIP/
 ├── TEST_REPORT.md                 # verification evidence
 ├── to do .txt                     # course deliverable checklist
 ├── DATA/                          # WBCBench 2026 images (101,716 JPEGs)
-├── DIP/                           # DIP pipeline, Cellpose, app shell
+├── DIP/                           # DIP pipeline, Cellpose experiment, app shell
 ├── CN/                            # TCP transport + edge–fog offloading
 ├── models/                        # canonical INT8/FP32 ONNX models
 ├── model_share/                   # curated deployment bundle
@@ -29,10 +29,10 @@ Project_DIP/
 | Path | Size | Files | Notes |
 |---|---:|---:|---|
 | `DATA/` | 3.9 GB | 101,717 | 101,716 JPEGs + `README.md`; not redistributable |
-| `DIP/` | 12 GB | 109,467 | Includes venv, checkpoints, Cellpose outputs |
+| `DIP/` | 12 GB | 109,467 | Includes venv, checkpoints, Cellpose experiment outputs |
 | `DIP/training/` | 8.7 GB | — | `.venv` 5.8 GB, checkpoints ~2.0 GB, results/logs |
-| `DIP/cellpose/` | 365 MB | — | Pilot, reports, scripts, source package |
-| `DIP/DATA_CELLPOSE/` | 2.1 GB | 68,782 outputs | Full segmentation output |
+| `DIP/cellpose/` | 365 MB | — | Cellpose experiment evidence: pilot, reports, scripts, source package |
+| `DIP/DATA_CELLPOSE/` | 2.1 GB | 68,782 outputs | Full Cellpose experiment output |
 | `CN/` | 25 MB | 77 | Source, tests, results, docs |
 | `models/` | 26 MB | 60 | ONNX models and evaluation |
 | `model_share/` | 24 MB | 50 | Deployment handoff bundle |
@@ -88,7 +88,7 @@ DIP/
 │   ├── logs/
 │   ├── docs/                      # historical experiments report
 │   ├── tests/                     # 9 feature tests
-│   ├── cellpose_training/         # Cellpose-crop experiments
+│   ├── cellpose_training/         # Rejected Cellpose-crop experiment
 │   └── .venv/                     # Python 3.10.22 environment
 ├── cellpose/
 │   ├── pilot/                     # 100-image pilot
@@ -99,7 +99,7 @@ DIP/
 │   ├── source_package/            # frozen source (read-only)
 │   ├── docs/
 │   └── _archives/                 # received ZIPs
-├── DATA_CELLPOSE/                 # full segmentation output
+├── DATA_CELLPOSE/                 # full Cellpose experiment output
 ├── DATA/                          # empty placeholder
 ├── next.txt                       # rare-class rescue ideas
 └── .git/                          # stale nested repo
