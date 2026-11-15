@@ -1,0 +1,27 @@
+# Default configuration for scripts/train.py
+data_root: ../DATA
+manifest: data/manifests/quality_features.csv
+
+train_split: phase2_train
+train_folder: pristine
+val_split: phase2_eval
+val_folder: pristine
+
+model: efficientnet_b0
+img_size: 224
+batch_size: 32
+epochs: 15
+lr: 0.0003
+weight_decay: 0.0001
+
+sampler: sqrt
+loss: weighted_ce
+label_smoothing: 0.05
+dropout: 0.2
+
+num_workers: 4
+seed: 42
+run_name: efficientnet_b0_pristine
+
+results_dir: results
+checkpoint_dir: checkpoints

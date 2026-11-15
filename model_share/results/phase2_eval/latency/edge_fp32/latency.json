@@ -1,0 +1,61 @@
+{
+  "phase": "B",
+  "model": "models/edge_quant/model_fp32.onnx",
+  "model_sha256": "7634fafcee5a8080bd118efbcd91db8d755be14c6fb17e5bba7ac152d959e080",
+  "model_size_bytes": 16086798,
+  "image": "DATA/pristine/phase1_train/00237093.jpg",
+  "input_shape": [
+    1,
+    3,
+    224,
+    224
+  ],
+  "batch_size": 1,
+  "threads": 1,
+  "warmup_runs": 5,
+  "measured_runs": 20,
+  "timed_scope": "onnxruntime session.run only",
+  "excludes": [
+    "image I/O",
+    "preprocessing",
+    "softmax",
+    "argmax"
+  ],
+  "latency_ms": [
+    12.521300000116753,
+    11.741802000415191,
+    11.666452000099525,
+    11.410412000259385,
+    11.394631999792182,
+    11.271874000158277,
+    11.433034000219777,
+    11.294523999822559,
+    11.762030000227242,
+    11.749145000067074,
+    11.880059999839432,
+    11.741322000034415,
+    11.75595799986695,
+    11.587754000174755,
+    11.472899999716901,
+    11.45576599992637,
+    11.360818999946787,
+    11.510167999858822,
+    11.464643999715918,
+    11.643076999916957
+  ],
+  "mean_ms": 11.605883650008764,
+  "median_ms": 11.548961000016789,
+  "p95_ms": 11.912121999853298,
+  "min_ms": 11.271874000158277,
+  "max_ms": 12.521300000116753,
+  "fps": 86.16319361423591,
+  "provider": "CPUExecutionProvider",
+  "environment": {
+    "onnxruntime": "1.23.2",
+    "onnx": "1.23.2",
+    "numpy": "2.2.6",
+    "pillow": "12.3.0",
+    "python": "3.10.22",
+    "platform": "Linux-7.0.0-43-generic-x86_64-with-glibc2.43"
+  }
+}

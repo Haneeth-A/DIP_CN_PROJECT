@@ -1,0 +1,47 @@
+{
+  "phase": "B",
+  "model": "models/edge_quant/model_fp32.onnx",
+  "model_sha256": "7634fafcee5a8080bd118efbcd91db8d755be14c6fb17e5bba7ac152d959e080",
+  "model_size_bytes": 16086798,
+  "split": [
+    "phase2_eval"
+  ],
+  "folders": [
+    "pristine",
+    "degraded"
+  ],
+  "manifest": "DIP/training/data/manifests/quality_features.csv",
+  "data_root": "DATA",
+  "images": 50,
+  "limit": 50,
+  "threads": 1,
+  "batch_size": 1,
+  "labels": [
+    "SNE",
+    "LY",
+    "MO",
+    "EO",
+    "BA",
+    "VLY",
+    "BNE",
+    "MMY",
+    "MY",
+    "PMY",
+    "BL",
+    "PC",
+    "PLY"
+  ],
+  "preprocessing": "models/edge_quant/preprocessing.json",
+  "quick_accuracy": 0.92,
+  "environment": {
+    "onnxruntime": "1.23.2",
+    "onnx": "1.23.2",
+    "numpy": "2.2.6",
+    "pillow": "12.3.0"
+  },
+  "artifacts": {
+    "predictions": "predictions.csv",
+    "probabilities": "probabilities.npy",
+    "image_ids": "image_ids.csv"
+  }
+}

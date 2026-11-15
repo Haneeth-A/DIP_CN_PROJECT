@@ -1,0 +1,8 @@
+dataset,split,status,count
+degraded,phase2_eval,no_object,5
+degraded,phase2_eval,ok,5345
+degraded,phase2_train,no_object,42
+degraded,phase2_train,ok,24855
+pristine,phase1_train,ok,8288
+pristine,phase2_eval,ok,5350
+pristine,phase2_train,ok,24897

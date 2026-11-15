@@ -1,0 +1,22 @@
+{
+  "images": [
+    "00002785",
+    "00882526",
+    "01442092",
+    "01444694",
+    "01446993"
+  ],
+  "profiles": [
+    "wifi",
+    "5g",
+    "poor_wifi",
+    "lpwan"
+  ],
+  "proxy": true,
+  "backend": "torch",
+  "fog_tta": "none",
+  "local": "onnx",
+  "timeout_s": 180.0,
+  "raw_csv": "CN/results/cn_edge_fog/tcp_validation_raw.csv",
+  "summary_csv": "CN/results/cn_edge_fog/tcp_validation_summary.csv"
+}

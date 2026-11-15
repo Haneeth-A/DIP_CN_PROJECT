@@ -1,0 +1,14 @@
+For the Cellpose pilot, the recorded setup is:
+- Cellpose version: 4.2.1.1
+- Model: pretrained CPSAM (CellposeModel(gpu=True, pretrained_model="cpsam"))
+- Evaluation call: model.eval(img, diameter=None, cellprob_threshold=0.0)
+- channels / channel_axis were not explicitly supplied in this recorded call.
+- flow_threshold, min_size, augment, tile, tile_overlap, resample and normalize were not explicitly supplied in that call, so the installed version's defaults applied.
+
+The pilot results contain 100 successfully processed images. I am sharing reconstructed post-processing scripts now. I still need to verify the exact image reader and confirm that the first 20 and additional 80 used identical settings before making a definitive statement about those details.
+
+
+It contains:
+- cellpose_pilot_settings_audit.py — checks the installed Cellpose version and API defaults.
+- cellpose_pilot_postprocessing_rebuild.py — rebuilds the observations table, crop manifest, crop-quality features, mask verification table and comparison grids from the saved pilot output folders.
+- README.txt — explains how to use the scripts.

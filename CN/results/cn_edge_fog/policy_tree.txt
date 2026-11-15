@@ -1,0 +1,34 @@
+|--- local_entropy <= 0.73
+|   |--- class_PC <= 0.50
+|   |   |--- local_margin <= 0.52
+|   |   |   |--- local_margin <= 0.51
+|   |   |   |   |--- class: local
+|   |   |   |--- local_margin >  0.51
+|   |   |   |   |--- class: offload
+|   |   |--- local_margin >  0.52
+|   |   |   |--- contrast <= 46.50
+|   |   |   |   |--- class: local
+|   |   |   |--- contrast >  46.50
+|   |   |   |   |--- class: local
+|   |--- class_PC >  0.50
+|   |   |--- rgb_colour_variation <= 44.04
+|   |   |   |--- bandwidth_kbps <= 1002.50
+|   |   |   |   |--- class: local
+|   |   |   |--- bandwidth_kbps >  1002.50
+|   |   |   |   |--- class: offload
+|   |   |--- rgb_colour_variation >  44.04
+|   |   |   |--- class: local
+|--- local_entropy >  0.73
+|   |--- loss_pct <= 4.00
+|   |   |--- class_PC <= 0.50
+|   |   |   |--- contrast <= 36.77
+|   |   |   |   |--- class: offload
+|   |   |   |--- contrast >  36.77
+|   |   |   |   |--- class: local
+|   |   |--- class_PC >  0.50
+|   |   |   |--- edge_density <= 20.61
+|   |   |   |   |--- class: offload
+|   |   |   |--- edge_density >  20.61
+|   |   |   |   |--- class: offload
+|   |--- loss_pct >  4.00
+|   |   |--- class: local

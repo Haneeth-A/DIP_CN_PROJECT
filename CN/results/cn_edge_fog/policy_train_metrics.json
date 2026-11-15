@@ -1,0 +1,21 @@
+{
+  "policy_train_images": 1000,
+  "policy_train_rows": 4000,
+  "policy_validation_images": 200,
+  "policy_validation_rows": 800,
+  "validation_action_agreement": 0.95625,
+  "max_depth": 4,
+  "lambda_ms": 1000.0,
+  "profiles": [
+    "wifi",
+    "5g",
+    "poor_wifi",
+    "lpwan"
+  ],
+  "fog_tta": "full",
+  "oracle_actions": {
+    "local": 3889,
+    "offload": 111
+  },
+  "include_predicted_class": true
+}

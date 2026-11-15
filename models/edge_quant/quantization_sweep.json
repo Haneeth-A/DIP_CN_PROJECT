@@ -1,0 +1,160 @@
+{
+  "phase": "A",
+  "purpose": "Quantization tuning on a fixed training holdout; official accuracy, macro-F1, per-class metrics, confusion matrix, and latency are deferred to Phase B on phase2_eval only.",
+  "holdout": {
+    "images": 500,
+    "seed": 1234,
+    "manifest": "/run/media/_a_h/New Volume/clg/IIIT RAICHUR/Project_DIP/DIP/training/data/manifests/quality_features.csv",
+    "calibration_csv": "/run/media/_a_h/New Volume/clg/IIIT RAICHUR/Project_DIP/models/edge_quant/calibration_ids.csv",
+    "note": "500 training images disjoint from the 512/1024/2048 calibration sets; the model was trained on them, so these are tuning sanity metrics only"
+  },
+  "fp32": {
+    "path": "/run/media/_a_h/New Volume/clg/IIIT RAICHUR/Project_DIP/models/edge_quant/model_fp32.onnx",
+    "accuracy": 0.968,
+    "macro_f1": 0.8096231958427431
+  },
+  "results": [
+    {
+      "name": "baseline_minmax_1024",
+      "config": {
+        "name": "baseline_minmax",
+        "calibrate_method": "minmax"
+      },
+      "int8_accuracy": 0.892,
+      "int8_macro_f1": 0.5869486682189241,
+      "fp32_agreement": 0.882,
+      "accuracy_delta_vs_fp32": -0.07599999999999996,
+      "macro_f1_delta_vs_fp32": -0.222674527623819,
+      "size_bytes": 4901547,
+      "path": "/tmp/edge_quant_sweep/baseline_minmax.onnx",
+      "calibration_size": 1024
+    },
+    {
+      "name": "minmax_moving_average_512",
+      "config": {
+        "name": "minmax_moving_average",
+        "calibrate_method": "minmax",
+        "calib_moving_average": true
+      },
+      "int8_accuracy": 0.922,
+      "int8_macro_f1": 0.7572375280311144,
+      "fp32_agreement": 0.932,
+      "accuracy_delta_vs_fp32": -0.04599999999999993,
+      "macro_f1_delta_vs_fp32": -0.05238566781162868,
+      "size_bytes": 4901545,
+      "path": "/tmp/edge_quant_sweep/minmax_moving_average.onnx",
+      "calibration_size": 512
+    },
+    {
+      "name": "minmax_moving_average_1024",
+      "config": {
+        "name": "minmax_moving_average",
+        "calibrate_method": "minmax",
+        "calib_moving_average": true
+      },
+      "int8_accuracy": 0.922,
+      "int8_macro_f1": 0.7570109711658594,
+      "fp32_agreement": 0.932,
+      "accuracy_delta_vs_fp32": -0.04599999999999993,
+      "macro_f1_delta_vs_fp32": -0.052612224676883756,
+      "size_bytes": 4901546,
+      "path": "/tmp/edge_quant_sweep/minmax_moving_average.onnx",
+      "calibration_size": 1024
+    },
+    {
+      "name": "minmax_moving_average_2048",
+      "config": {
+        "name": "minmax_moving_average",
+        "calibrate_method": "minmax",
+        "calib_moving_average": true
+      },
+      "int8_accuracy": 0.914,
+      "int8_macro_f1": 0.7537922558295176,
+      "fp32_agreement": 0.932,
+      "accuracy_delta_vs_fp32": -0.05399999999999994,
+      "macro_f1_delta_vs_fp32": -0.05583094001322553,
+      "size_bytes": 4901546,
+      "path": "/tmp/edge_quant_sweep/minmax_moving_average.onnx",
+      "calibration_size": 2048
+    },
+    {
+      "name": "minmax_moving_average_no_gemm_1024",
+      "config": {
+        "name": "minmax_moving_average_no_gemm",
+        "calibrate_method": "minmax",
+        "calib_moving_average": true,
+        "exclude_gemm": true
+      },
+      "int8_accuracy": 0.92,
+      "int8_macro_f1": 0.7555091749263243,
+      "fp32_agreement": 0.934,
+      "accuracy_delta_vs_fp32": -0.04799999999999993,
+      "macro_f1_delta_vs_fp32": -0.054114020916418815,
+      "size_bytes": 4949906,
+      "path": "/tmp/edge_quant_sweep/minmax_moving_average_no_gemm.onnx",
+      "calibration_size": 1024
+    },
+    {
+      "name": "minmax_moving_average_no_gemm_no_silu_1024",
+      "config": {
+        "name": "minmax_moving_average_no_gemm_no_silu",
+        "calibrate_method": "minmax",
+        "calib_moving_average": true,
+        "exclude_gemm": true,
+        "exclude_silu": true
+      },
+      "int8_accuracy": 0.926,
+      "int8_macro_f1": 0.7625632915235735,
+      "fp32_agreement": 0.946,
+      "accuracy_delta_vs_fp32": -0.041999999999999926,
+      "macro_f1_delta_vs_fp32": -0.04705990431916962,
+      "size_bytes": 4874586,
+      "path": "/tmp/edge_quant_sweep/minmax_moving_average_no_gemm_no_silu.onnx",
+      "calibration_size": 1024
+    },
+    {
+      "name": "minmax_moving_average_no_last_block_1024",
+      "config": {
+        "name": "minmax_moving_average_no_last_block",
+        "calibrate_method": "minmax",
+        "calib_moving_average": true,
+        "exclude_last_block": true
+      },
+      "int8_accuracy": 0.92,
+      "int8_macro_f1": 0.7555091749263243,
+      "fp32_agreement": 0.934,
+      "accuracy_delta_vs_fp32": -0.04799999999999993,
+      "macro_f1_delta_vs_fp32": -0.054114020916418815,
+      "size_bytes": 6158315,
+      "path": "/tmp/edge_quant_sweep/minmax_moving_average_no_last_block.onnx",
+      "calibration_size": 1024
+    }
+  ],
+  "selected": {
+    "name": "minmax_moving_average_1024",
+    "config": {
+      "name": "minmax_moving_average",
+      "calibrate_method": "minmax",
+      "calib_moving_average": true
+    },
+    "calibration_size": 1024,
+    "rationale": "CalibMovingAverage gave the largest recovery (+3.0 accuracy, +17 macro-F1 vs MinMax baseline). 512 and 1024 calibration images tied; 2048 was slightly worse. Excluding Gemm/SiLU was within noise and leaves the Gemm head in FP32 as well, so the default QDQ model (no explicit op exclusions) was selected for edge latency. ORT still leaves the SiLU blocks in FP32."
+  },
+  "discarded": {
+    "percentile_entropy": "OOM-killed during calibration in ORT 1.23.2",
+    "reduce_range": "slightly worse accuracy and macro-F1",
+    "calib_tensor_range_symmetric": "catastrophic accuracy collapse",
+    "calibration_2048": "slightly worse than 512/1024 on the fixed holdout"
+  },
+  "model": {
+    "fp32_path": "models/edge_quant/model_fp32.onnx",
+    "fp32_size_bytes": 16086798,
+    "int8_path": "models/edge_quant/model_int8.onnx",
+    "int8_size_bytes": 4901546,
+    "int8_to_fp32_size_ratio": 0.3046936997654847,
+    "int8_sha256": "5822d6497b425a1314e8625a35a0529e137523872a766ad3b13ebc99f5c016c7",
+    "fp32_sha256": "7634fafcee5a8080bd118efbcd91db8d755be14c6fb17e5bba7ac152d959e080"
+  },
+  "artifacts_note": "Per-config sweep ONNX files were temporary under /tmp/edge_quant_sweep and are not preserved; the selected final model is models/edge_quant/model_int8.onnx.",
+  "metadata": "models/edge_quant/quantization_config.json"
+}

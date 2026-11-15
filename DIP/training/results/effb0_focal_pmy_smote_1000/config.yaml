@@ -1,0 +1,33 @@
+batch_size: 64
+checkpoint: /run/media/_a_h/New Volume/clg/IIIT RAICHUR/Project_DIP/DIP/training/checkpoints/effb0_224_bs64_mixed_focal_reran/best.pt
+data_root: /run/media/_a_h/New Volume/clg/IIIT RAICHUR/Project_DIP/DATA
+epochs: 4
+freeze_backbone: false
+img_size: 224
+label_smoothing: 0.05
+lr: 0.0001
+manifest: /run/media/_a_h/New Volume/clg/IIIT RAICHUR/Project_DIP/DIP/training/data/manifests/quality_features.csv
+sampler: sqrt
+seed: 42
+synthetic_count: 1000
+target_class: PMY
+train_folders:
+- pristine
+- degraded
+train_splits:
+- phase1_train
+- phase2_train
+val_folders:
+- pristine
+- degraded
+val_splits: phase2_eval
+views:
+- base
+- hflip
+- vflip
+- rot90
+- rot180
+- rot270
+- hflip_rot90
+- vflip_rot90
+weight_decay: 0.0001

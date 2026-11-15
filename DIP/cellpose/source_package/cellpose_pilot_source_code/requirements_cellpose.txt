@@ -1,0 +1,7 @@
+cellpose==4.2.1.1
+numpy
+pandas
+pyarrow
+Pillow
+matplotlib
+opencv-python

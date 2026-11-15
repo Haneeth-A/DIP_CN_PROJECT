@@ -1,0 +1,23 @@
+{
+  "expected_total": 68782,
+  "manifest_rows": 68782,
+  "manifest_unique_rows": 68782,
+  "duplicate_manifest_rows": 0,
+  "missing_manifest_rows": 0,
+  "extra_manifest_rows": 0,
+  "actual_png_count": 68782,
+  "missing_outputs": 0,
+  "extra_outputs": 0,
+  "zero_byte_outputs": 0,
+  "unreadable_outputs": 0,
+  "images_verified": 68782,
+  "phase2_test_outputs": 0,
+  "status_counts": {
+    "ok": 68735,
+    "no_object": 47
+  },
+  "fallback_rate": 0.0006833183100229711,
+  "issue_rows": 47,
+  "elapsed_seconds": 5.3722264766693115,
+  "gate_pass": true
+}

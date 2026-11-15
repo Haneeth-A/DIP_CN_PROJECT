@@ -1,0 +1,40 @@
+Yes. Priorities are clear from the test errors:
+Target	Current test F1	Realistic target
+PC	0.000	0.50 / 0.80
+PLY	0.000	0.50 / 0.80
+BNE	0.430	0.60 / 0.80
+MMY	0.684	0.80 / 0.90
+VLY	0.732	0.85 / 0.90
+PMY	0.706	0.85 / 0.90
+1. PC/PLY rescue — do this first
+The ensemble never predicts PC or PLY. All test PC goes to LY/VLY, all PLY goes to VLY. This is exactly the paper’s Stage 3 rescue target.
+Implement a decision-level override, not another generic training run:
+- For PC: collect embeddings/features for true PC, LY, and VLY from the training split. Train a small binary classifier or Mahalanobis filter using nuclear-cytoplasmic ratio, staining intensity, and centroid offset. Apply it only when the base prediction is LY or VLY, and only above a high-precision threshold.
+- For PLY: use a spikiness/contour-irregularity score and apply it only when the base prediction is LY or VLY. PLY has only 4 test images, so keep the threshold conservative.
+- Choose thresholds on phase2_eval, never on test.
+Potential: PC/PLY at 0.5 each takes ensemble macro from 0.7037 → ~0.781. At 0.8 each, ~0.827.
+2. BNE vs SNE binary rescue
+BNE is the next biggest problem:
+- True BNE: 119 correct, 87 → SNE, 23 → MMY, 21 → MO.
+- False BNE: 151 SNE → BNE, 24 MMY → BNE.
+So BNE has both missed positives and too many SNE false positives. Train a high-precision BNE-vs-SNE head on embeddings, with SNE hard negatives. Override only when the binary head is confident. Also inspect a sample of BNE/SNE errors for label ambiguity before training.
+3. MMY, PMY, VLY — targeted binary heads
+Do not use generic SMOTE again. Use pairwise/one-vs-confuser heads:
+- MMY vs MY/MO/BNE/SNE.
+- PMY vs MY/BL.
+- VLY vs LY/MO/BL.
+Train on frozen ensemble embeddings with logistic regression or LightGBM, class-weighted, and calibrate the threshold on eval. These are cheap and less likely to damage the strong classes.
+4. Easy ensemble/calibration improvements
+- Try class-wise ensemble weights or per-class thresholds chosen on phase2_eval.
+- Try temperature scaling for confidence calibration.
+- Try the existing prior-correction --tau-grid on eval, then apply the chosen value to test.
+These are small gains, but cheap.
+Do not repeat
+- More generic PLY/BNE/VLY/MMY/MY/PMY synthetic oversampling: already tried, no target recall gain.
+- More PLY runs: one unique eval cell.
+- More TTA: already full.
+- Tuning on the test set: use phase2_eval for all decisions
+-
+-
+-
+- and cellpose
