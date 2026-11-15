@@ -31,6 +31,14 @@ DIP/cellpose/reports/*.log
 *.pt
 *.pth
 
+# App runtime fog ensemble checkpoints
+!DIP/training/checkpoints/effb0_224_bs64_mixed_focal_reran/
+!DIP/training/checkpoints/effb0_224_bs64_mixed_focal_reran/best.pt
+!DIP/training/checkpoints/effb0_224_bs64_mixed_eff/
+!DIP/training/checkpoints/effb0_224_bs64_mixed_eff/best.pt
+!DIP/training/checkpoints/effb0_224_bs64_mixed/
+!DIP/training/checkpoints/effb0_224_bs64_mixed/best.pt
+
 # Cellpose generated outputs
 DIP/cellpose/.venv-cellpose/
 DIP/cellpose/_archives/
