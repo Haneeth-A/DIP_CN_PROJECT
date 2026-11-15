@@ -4,7 +4,8 @@ Pillow==13.0.0
 # Core ML
 torch==2.6.0
 torchvision==0.21.0
-# For CUDA 12.4 (RTX 4060) install torch/torchvision from:
+
+# For CUDA 12.4 (RTX 4060), install separately using:
 # pip install torch==2.6.0 torchvision==0.21.0 --index-url https://download.pytorch.org/whl/cu124
 
 numpy>=1.26
@@ -16,3 +17,6 @@ PyYAML>=6.0
 tqdm>=4.66
 matplotlib>=3.8
 pytest>=8.0
+
+# Edge AI ONNX inference
+onnxruntime>=1.18,<2
