@@ -107,7 +107,10 @@ cd model_share/deploy
 | `model_share/` | Curated deployment/handoff bundle |
 | `feature_analysis/` | Quality-feature CSVs and severity plots |
 | `DUMP/` | Archive of superseded/duplicate/scratch material (nothing deleted) |
-| GitHub Releases (`v1.0.0`) | Verified DIP submission snapshot; large artifact |
+
+> The application submission ZIP is a separate deliverable. It was used only for
+> the application submission and is **not tracked or released** in this
+> repository.
 
 ## Data and licence
 

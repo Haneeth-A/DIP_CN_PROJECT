@@ -114,7 +114,7 @@ design.
 | CN policy | `CN/results/cn_edge_fog/policy_tree.joblib` |
 | CN results | `CN/results/cn_edge_fog/` |
 | Cellpose experiment outputs | `DIP/DATA_CELLPOSE/` (evidence only; not integrated) |
-| DIP submission snapshot | GitHub Release asset `v1.0.0` (checksum in `DIP/`) |
+| Application submission ZIP | External artifact only; not tracked or released |
 | Archive index | `DUMP/ARCHIVE_INDEX.md` |
 
 ## Using the model from an application
@@ -204,9 +204,9 @@ preserved at `975b10878e2685373f5b7974c0813c300d691093` on branch
 - The nested `DIP/.git` was archived and removed before import; it is not a
   source of truth.
 - The root `.gitignore` excludes raw data, venvs, checkpoints, Cellpose
-  experiment outputs, runtime logs, and the submission ZIP.
-- Keep the verified submission ZIP in the GitHub Release (`v1.0.0`), not in
-  normal source control.
+  experiment outputs, runtime logs, and the application submission ZIP.
+- The application submission ZIP and checksum are local-only; they are not
+  tracked or released.
 - Do not rewrite or delete the backup branch/tag.
 
 ## Remaining work (application excluded)
@@ -216,8 +216,8 @@ pipeline/report work is:
 
 1. Faculty demo of the complete deployment (course requirement).
 2. Report, research paper, and PPT. Outlines are in
-   `DUMP/historical_docs/PROJECT_PLAN.md`; a DIP report exists in the
-   submission zip attached to GitHub Releases.
+   `DUMP/historical_docs/PROJECT_PLAN.md`; a DIP report exists in the external
+   application ZIP, which is not part of this repository.
 3. Patient-level leakage check using Hugging Face metadata/`patient_hash`.
 4. Rare-class rescue heads (PC/PLY/BNE/MMY/VLY), starting from `DIP/next.txt`.
 5. Clean batch/LR ablation and seed-variance runs.

@@ -21,8 +21,6 @@ images. Authority levels:
 | `FILE_INDEX.md` | ACTIVE | This index |
 | `TEST_REPORT.md` | ACTIVE | Verification commands and outcomes |
 | `to do .txt` | SUPPORT | Course deliverable checklist |
-| GitHub Releases `v1.0.0` | EVIDENCE | Verified DIP submission snapshot (zip) |
-| `DIP/DIP_WBC_2026_submission.zip.sha256` | EVIDENCE | SHA-256 for the release snapshot |
 
 ## DIP training pipeline — `DIP/training/`
 

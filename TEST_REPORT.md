@@ -34,7 +34,6 @@ not a substitute for the full experiment logs in `DIP/training/logs/` and
 | CN demo | **PASS** — local and offload paths exercised |
 | Final metric files | **PASS** — values match documented results |
 | Dataset counts | **PASS** — 101,716 images, per-split counts match |
-| Submission zip checksum | **PASS** — SHA-256 matches `.sha256` |
 | Archived snapshot checksums | **PASS** — 567/567 entries OK |
 | `model_share` checksums | **PASS** — 49/49 entries OK after regeneration |
 | Markdown link check | **PASS** — 0 broken links in active docs |
@@ -183,21 +182,8 @@ There is no `degraded/phase1_train`.
 
 ### 9. Checksums
 
-The 165 MB submission zip is attached to GitHub Releases (`v1.0.0`); only its
-`.sha256` file is tracked in the repository.
-
-```text
-DIP/DIP_WBC_2026_submission.zip
-ba6aceb18125a8861d4a7c6577321f4ae88ebc7d10e9f98237245753a874d3b1
-```
-
-Verify from the `DIP/` directory (the `.sha256` file stores a bare filename):
-
-```bash
-cd DIP
-sha256sum -c DIP_WBC_2026_submission.zip.sha256
-# DIP_WBC_2026_submission.zip: OK
-```
+The application submission ZIP is an external deliverable. It is not tracked in
+this repository, and no GitHub Release is required.
 
 The extracted snapshot's manifest verifies in its archived location:
 

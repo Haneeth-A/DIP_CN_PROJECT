@@ -85,7 +85,7 @@ From `to do .txt`:
 | Deliverable | Status | Notes |
 |---|---|---|
 | Complete project (deployment + repository) | PARTIAL | Model/edge/CN complete; GitHub aligned; Streamlit integration out of scope |
-| Project report | PENDING | DIP report exists inside the submission zip; consolidated report not written |
+| Project report | PENDING | DIP report exists in the external application ZIP (not in repo); consolidated report not written |
 | Research paper | PENDING | Outline in `DUMP/historical_docs/PROJECT_PLAN.md` |
 | PPT | PENDING | Outline in `DUMP/historical_docs/PROJECT_PLAN.md`; CN slides exist |
 | Faculty demo | PENDING | Required before finishing documentation |
@@ -124,7 +124,7 @@ integration is planned.
 | `DIP/DATA_CELLPOSE_workers_test_012221/` | `DUMP/old_experiments/...` | Worker scratch test |
 | `model_share.zip` | `DUMP/duplicate_files/model_share.zip` | Older snapshot |
 | `CN/dump/` | `DUMP/CN/` | Consolidated component archive |
-| `DIP/DIP_WBC_2026_submission/` | `DUMP/previous_submissions/...` | Extracted snapshot; zip attached to GitHub Releases |
+| `DIP/DIP_WBC_2026_submission/` | `DUMP/previous_submissions/...` | Extracted snapshot; external application ZIP not in repo |
 | `DIP/cellpose/docs/README_Cellpose_Pilot.txt` | `DUMP/duplicate_files/cellpose/...` | Byte-identical duplicate |
 
 See [`DUMP/ARCHIVE_INDEX.md`](DUMP/ARCHIVE_INDEX.md) for hashes, sizes, and
@@ -138,9 +138,8 @@ restore instructions. No files were deleted.
 - `DIP/training/docs/README.md` points to this file for authoritative status.
 - The extracted submission snapshot in `DUMP/previous_submissions/` was built
   against a different folder depth; its relative commands are valid only when
-  the snapshot is used as a standalone package. The verified zip is attached to
-  GitHub Releases (`v1.0.0`); its checksum is kept at
-  `DIP/DIP_WBC_2026_submission.zip.sha256`.
+  the snapshot is used as a standalone package. The external application ZIP and
+  checksum are local-only and are not tracked or released.
 - The nested `DIP/.git` was archived and removed before the repository import;
   the project root is the Git repository.
 

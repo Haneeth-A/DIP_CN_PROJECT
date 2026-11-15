@@ -16,14 +16,14 @@ directory.
 | `PROJECT_PLAN.md` | `DUMP/historical_docs/PROJECT_PLAN.md` | Historical | Original plan, superseded by status/handover docs | 20 KB | Contents preserved |
 | `STATUS.md` | `DUMP/historical_docs/STATUS.md` | Historical | Superseded by `IMPLEMENTATION_STATUS.md` | 4 KB | Contents preserved |
 | `DIP/cellpose/docs/README_Cellpose_Pilot.txt` | `DUMP/duplicate_files/cellpose/README_Cellpose_Pilot.txt` | Duplicate | Byte-identical to the frozen source-package copy | 1.6 KB | SHA-256 `c731d107e8296f370ca9fea88305e0110bccd86caa930c3123d0ee68fab0f59d` |
-| `DIP/DIP_WBC_2026_submission/` | `DUMP/previous_submissions/DIP/DIP_WBC_2026_submission/` | Previous submission | Extracted snapshot; verified zip kept active | 217 MB | 567-entry `checksums.sha256` verifies in the new location |
+| `DIP/DIP_WBC_2026_submission/` | `DUMP/previous_submissions/DIP/DIP_WBC_2026_submission/` | Previous submission | Extracted snapshot; external application ZIP not in repo | 217 MB | 567-entry `checksums.sha256` verifies in the new location |
 
-## Kept active
+## Kept outside the archive (local only)
 
 | Path | Reason |
 |---|---|
-| `DIP/DIP_WBC_2026_submission.zip` | Verified DIP submission deliverable |
-| `DIP/DIP_WBC_2026_submission.zip.sha256` | SHA-256 `ba6aceb18125a8861d4a7c6577321f4ae88ebc7d10e9f98237245753a874d3b1` |
+| `DIP/DIP_WBC_2026_submission.zip` | External application deliverable; not tracked or released |
+| `DIP/DIP_WBC_2026_submission.zip.sha256` | Local checksum for the external ZIP; not tracked |
 | `DIP/training/.venv/` | Runnable environment used for verification and development |
 | `DIP/.git/` | Historical nested repo; kept for provenance, not used as source of truth |
 | `DATA/`, `DIP/DATA_CELLPOSE/` | Dataset and derived images; not redistributable, not archived |

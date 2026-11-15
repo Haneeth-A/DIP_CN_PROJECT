@@ -44,5 +44,5 @@ DUMP/*
 !DUMP/historical_docs/
 DUMP/historical_docs/*
 !DUMP/historical_docs/PROJECT_PLAN.md
-DIP/DIP_WBC_2026_submission.zip
+DIP/DIP_WBC_2026_submission.zip*
 WBC_App_Dev_Bundle_*

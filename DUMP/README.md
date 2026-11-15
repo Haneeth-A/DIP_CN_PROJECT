@@ -25,5 +25,6 @@ sizes, hashes, and restore commands.
 - Do not edit archived results manually.
 - If an item is restored, move it back to its original path and update
   `ARCHIVE_INDEX.md`.
-- The active DIP submission zip remains at
-  `DIP/DIP_WBC_2026_submission.zip`; only the extracted folder was archived.
+- The application submission ZIP and checksum are local-only; they are not
+  tracked and no GitHub Release is required. Only the extracted folder was
+  archived.
