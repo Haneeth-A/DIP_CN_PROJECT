@@ -13,18 +13,14 @@ DATA/
 DIP/DATA
 DIP/DATA/
 DIP/DATA_CELLPOSE/
-CN/models/edge_deployment/sample.jpg
 CN/dump/
 model_share/deploy/sample.jpg
 2603.16249v4.pdf
 
 # Training artifacts
 DIP/training/checkpoints/*
-!DIP/training/checkpoints/README.md
 DIP/training/cellpose_training/*
-!DIP/training/cellpose_training/README.md
 DIP/training/logs/*
-!DIP/training/logs/README.md
 DIP/training/results/*.log
 DIP/cellpose/reports/*.log
 *.pid
@@ -45,12 +41,8 @@ DIP/cellpose/_archives/
 DIP/cellpose/pilot/
 DIP/cellpose/pilot_complete_results/
 
-# Archive and large bundles
-DUMP/*
-!DUMP/ARCHIVE_INDEX.md
-!DUMP/README.md
-!DUMP/historical_docs/
-DUMP/historical_docs/*
-!DUMP/historical_docs/PROJECT_PLAN.md
+# Archive, local-only paper, and large bundles
+DUMP/
+paper/
 DIP/DIP_WBC_2026_submission.zip*
 WBC_App_Dev_Bundle_*

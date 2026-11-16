@@ -1,50 +1,48 @@
-# WBC DIP–CN Project — Developer Handover
+# WBC DIP–CN Project
 
 13-class White Blood Cell (WBC) classification for cancer screening on
-**WBCBench 2026**, built as a Digital Image Processing (DIP) + Computer Networks
-(CN) project.
+**WBCBench 2026**, built as a Digital Image Processing (DIP) and Computer
+Networks (CN) project.
 
 - **Team:** A. Haneeth, Nivrutha Varshini
 - **Guides:** Dr. Mehbub Alam, Dr. Koushiki Roy
 - **Institution:** IIIT Raichur
-- **Repository:** https://github.com/HaneethAlla/DIP_CN_PROJECT
+- **Repository:** https://github.com/Haneeth-A/DIP_CN_PROJECT
 
-> **Handover scope.** The model, edge deployment, CN transport/offloading
-> system, and evidence package are complete. Cellpose was evaluated as a
-> segmentation-based improvement but produced a negative result; it is **not
-> integrated**. The Streamlit application integration is **out of scope for this
-> handover** and is the next developer's task. Start with
-> [`DEVELOPER_HANDOVER.md`](DEVELOPER_HANDOVER.md).
+## Live application
 
-## Read in this order
+**Streamlit deployment:**
+https://dipcnproject-iznyisdqoq6lr7tjnyw9nu.streamlit.app/
 
-| Document | What it answers |
-|---|---|
-| [`DEVELOPER_HANDOVER.md`](DEVELOPER_HANDOVER.md) | Environment, commands, gotchas, next tasks |
-| [`ARCHITECTURE.md`](ARCHITECTURE.md) | How the DIP, edge, and CN pieces fit together |
-| [`IMPLEMENTATION_STATUS.md`](IMPLEMENTATION_STATUS.md) | What is done, what is pending, what is out of scope |
-| [`PROJECT_STRUCTURE.md`](PROJECT_STRUCTURE.md) | Annotated tree, sizes, and data layout |
-| [`FILE_INDEX.md`](FILE_INDEX.md) | Where every important file lives |
-| [`TEST_REPORT.md`](TEST_REPORT.md) | Commands run during verification and their results |
-| [`DUMP/ARCHIVE_INDEX.md`](DUMP/ARCHIVE_INDEX.md) | What was archived, where, and why |
+The application supports:
 
-## Status at a glance
+- WBC image upload and preview
+- Seven image-quality feature measurements
+- INT8 Edge inference with an ONNX model
+- Learned Edge/Fog routing by network profile
+- Fog ensemble inference over a real local TCP connection
+- Top-3 predictions, confidence, latency, and TCP integrity details
 
-| Area | State | Summary |
-|---|---|---|
-| DIP classifier | DONE | EfficientNet-B0, mixed pristine/degraded training, focal loss + sqrt sampler |
-| Validation / test | DONE | `phase2_eval` and held-out `phase2_test` evaluated |
-| Ensembles / TTA | DONE | Top-3 equal-weight ensemble with 8-view TTA |
-| Edge deployment | DONE | INT8 ONNX, PyTorch-free wrapper, latency benchmark |
-| CN transport | DONE | TCP framing, SHA-256 integrity, ACK/retransmit, threaded server |
-| CN edge–fog policy | DONE | Learned local/offload policy, 500-image matrix, real-TCP validation |
-| Cellpose experiment | NEGATIVE RESULT | Pilot + full run done; crops underperformed full images; not integrated |
-| Quality features | DONE | 7 features, manifests, severity analysis |
-| 5-fold CV | DONE | All 5 image-level folds (training-pool only; not patient-safe) |
-| Streamlit application | **OUT OF SCOPE** | Upload/preview shell only; inference not wired |
-| Report / paper / PPT | **PENDING** | Outlines exist in `DUMP/historical_docs/PROJECT_PLAN.md` |
-| Faculty demo | **PENDING** | Required by the course checklist |
-| Git alignment | DONE | Root repo pushed; old `main` preserved in backup branch/tag |
+> This is an academic research prototype. It is not a clinical diagnostic tool.
+
+## System overview
+
+```text
+Uploaded image
+     |
+     v
+Quality features ──> Learned routing policy ──> Edge INT8 prediction
+                              |
+                              +──> Fog ensemble over TCP
+```
+
+- **DIP model:** EfficientNet-B0, 13 WBC classes.
+- **Edge model:** static INT8 ONNX, CPU inference, no PyTorch needed.
+- **Fog model:** three-checkpoint EfficientNet ensemble with 8-view TTA.
+- **Routing:** a learned policy selects local Edge inference or Fog offload
+  using image quality, Edge confidence, and network-profile features.
+- **Transport:** framed TCP with SHA-256 image integrity, ACK/retransmit, and a
+  threaded Fog server.
 
 ## Main results
 
@@ -56,75 +54,91 @@
 | `phase2_test` | top-3 TTA ensemble | **0.7037** | 0.9591 |
 
 - **Edge INT8:** accuracy 0.8901, macro-F1 0.6090, 6.39 ms/image on one CPU
-  thread; FP32 is 0.9296/0.7149 at 11.61 ms. INT8 is 1.82× faster with a
-  −0.106 macro-F1 drop.
-- **CN:** on the 500-image eval split, always-local 0.848, always-fog 0.914,
-  learned policy 0.870, oracle 0.926. On WiFi/5G the policy costs ~160 ms versus
-  ~577 ms for always-fog; real-TCP validation passed 20/20 with 100% SHA-256
-  integrity.
-- **5-fold CV:** mean macro-F1 0.8461 ± 0.0114 on held-out folds of the
-  training pool. This is **not comparable** to `phase2_eval`/`phase2_test`
-  because it validates on training-distribution images.
-- **Cellpose experiment:** 68,782 outputs (68,735 `ok`, 47 `no_object`, QA gate
-  passed). The best Cellpose-crop classifier reached 0.7067, below the 0.7144
-  full-image model. It is a negative result and is **not integrated** into the
-  app, edge model, or CN path.
+  thread.
+- **CN policy:** always-local 0.848, always-Fog 0.914, learned policy 0.870,
+  oracle 0.926 on the 500-image evaluation split.
+- **TCP validation:** 20/20 successful requests with 100% SHA-256 integrity.
+- **5-fold CV:** mean macro-F1 0.8461 ± 0.0114 on held-out training-pool folds;
+  not directly comparable to `phase2_eval` or `phase2_test`.
+- **Cellpose experiment:** negative result (best crop classifier 0.7067 versus
+  0.7144 full-image). Cellpose is retained as evidence but is not integrated
+  into the deployed application.
 
-## Quick start
-
-Use the existing training virtual environment. It has Python 3.10.22,
-torch 2.6.0+cu124, torchvision 0.21.0+cu124, and onnxruntime 1.23.2.
-
-```bash
-# DIP tests
-cd DIP/training
-PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m pytest -q tests -p no:cacheprovider
-
-# CN tests
-cd CN
-PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src ../DIP/training/.venv/bin/python \
-  -m pytest -q -p no:cacheprovider
-
-# CN demo (real local model + real fog backend + real TCP on offload)
-cd CN
-PYTHONPATH=src ../DIP/training/.venv/bin/python -m cn.edge.demo \
-  --image ../DATA/pristine/phase2_eval/00002785.jpg \
-          ../DATA/degraded/phase2_eval/01441804.jpg
-
-# Standalone INT8 edge inference (no PyTorch)
-cd model_share/deploy
-../../DIP/training/.venv/bin/python predict.py --image /path/to/image.jpg --compact
-```
-
-## Repository map
+## Repository layout
 
 | Path | Contents |
 |---|---|
-| `DATA/` | Raw WBCBench JPEGs, 101,716 images (not redistributable) |
-| `DIP/` | DIP pipeline: training, quality features, Cellpose evidence, app shell |
-| `CN/` | TCP transport and edge–fog offloading system |
-| `models/` | Canonical INT8/FP32 ONNX models and Phase B evaluation |
-| `model_share/` | Curated deployment/handoff bundle |
-| `feature_analysis/` | Quality-feature CSVs and severity plots |
-| `DUMP/` | Archive of superseded/duplicate/scratch material (nothing deleted) |
+| `DIP/training/app.py` | Streamlit application entry point |
+| `DIP/training/src/` | Quality features, data, model, and training modules |
+| `DIP/training/checkpoints/` | Three runtime Fog ensemble checkpoints |
+| `DIP/training/results/` | Training, validation, test, ensemble, and 5-fold outputs |
+| `DIP/cellpose/` | Cellpose negative-result experiment and evidence |
+| `CN/src/cn/` | TCP transport, Fog backend, Edge predictor, and routing policy |
+| `CN/results/cn_edge_fog/` | Policy matrix, TCP validation, and figures |
+| `CN/tests/` | Transport, backend, policy, and integration tests |
+| `model_share/deploy/` | Quantized INT8 ONNX model and deployment wrapper |
+| `model_share/SHA256SUMS` | Checksums for the submitted model bundle |
+| `model_share/results/` | Edge/Fog evaluation outputs |
+| `feature_analysis/` | Quality-feature CSVs, severity analysis, and notebook |
+| `docs/` | Architecture, test report, experiments, and CN technical notes |
 
-> The application submission ZIP is a separate deliverable. It was used only for
-> the application submission and is **not tracked or released** in this
-> repository.
+## Run locally
+
+Use the existing Python 3.10 environment at `DIP/training/.venv`.
+
+```bash
+cd "/path/to/Project_DIP"
+DIP/training/.venv/bin/python -m streamlit run DIP/training/app.py
+```
+
+Open `http://localhost:8501`, upload a JPG/JPEG/PNG WBC image, and select a
+network profile:
+
+- **WiFi / 5G** usually keeps inference on the Edge.
+- **Poor WiFi / LPWAN** can trigger Fog offload through TCP.
+
+## Tests
+
+```bash
+# DIP quality-feature tests
+cd DIP/training
+PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m pytest -q tests -p no:cacheprovider
+
+# CN transport, backend, and policy tests
+cd CN
+PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src ../DIP/training/.venv/bin/python \
+  -m pytest -q -p no:cacheprovider
+```
+
+Some tests skip automatically when the non-redistributable dataset is absent.
 
 ## Data and licence
 
-`DATA/` and `DIP/DATA_CELLPOSE/` contain dataset-derived images. **Do not
-commit or redistribute them.** The dataset is
+`DATA/` and `DIP/DATA_CELLPOSE/` contain dataset-derived images and are not
+included in this repository. The dataset is
 [`Xin-Tian/wbcbench2026`](https://huggingface.co/datasets/Xin-Tian/wbcbench2026).
-`phase2_test` is reserved for final evaluation and must not be used for tuning.
-The official `patient_hash` metadata was not downloaded, so patient-level
-leakage is unverified.
 
-## Known gaps
+Do not commit or redistribute dataset-derived images. `phase2_test` is reserved
+for final evaluation and must not be used for tuning. Patient-level leakage
+remains unverified because the official `patient_hash` metadata was not
+downloaded.
 
-- The Streamlit app (`DIP/training/app.py`) does not run inference yet.
-- Rare classes PC/PLY/BNE dominate the remaining error; no rescue heads yet.
-- Batch/LR ablation and seed-variance study are incomplete.
-- Report, research paper, and PPT are not written.
-- Device/phone latency benchmarking is not recorded.
+## Documentation
+
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — system design and invariants
+- [`docs/TEST_REPORT.md`](docs/TEST_REPORT.md) — verification evidence
+- [`docs/EXPERIMENTS_REPORT.md`](docs/EXPERIMENTS_REPORT.md) — training and
+  evaluation details
+- [`docs/CN_TCP_API.md`](docs/CN_TCP_API.md) — transport contract
+- [`docs/CN_EDGE_POLICY.md`](docs/CN_EDGE_POLICY.md) — Edge/Fog policy details
+- [`docs/CN_EDGE_PHASE2_REPORT.md`](docs/CN_EDGE_PHASE2_REPORT.md) — Phase 2
+  Edge–Fog report
+- [`docs/CN_RESULTS.md`](docs/CN_RESULTS.md) — Edge–Fog results summary
+
+## Known limitations
+
+- Rare classes PC/PLY/BNE dominate the remaining classification error.
+- The INT8 Edge model trades macro-F1 for lower latency.
+- The 5-fold CV is image-level, not patient-safe.
+- Cellpose segmentation did not improve classification and is not integrated.
+- Device/phone latency benchmarking has not been recorded.

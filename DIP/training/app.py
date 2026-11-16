@@ -19,13 +19,13 @@ sys.path.insert(0, str(REPO_ROOT / "DIP" / "training" / "src"))
 sys.path.insert(0, str(REPO_ROOT / "CN" / "src"))
 
 EDGE_MODEL = (
-    REPO_ROOT / "CN/models/edge_deployment/model_int8.onnx"
+    REPO_ROOT / "model_share/deploy/model_int8.onnx"
 )
 EDGE_LABELS = (
-    REPO_ROOT / "CN/models/edge_deployment/labels.json"
+    REPO_ROOT / "model_share/deploy/labels.json"
 )
 EDGE_PREPROCESSING = (
-    REPO_ROOT / "CN/models/edge_deployment/preprocessing.json"
+    REPO_ROOT / "model_share/deploy/preprocessing.json"
 )
 POLICY_PATH = (
     REPO_ROOT / "CN/results/cn_edge_fog/policy_tree.joblib"
@@ -111,7 +111,7 @@ def load_pipeline():
         labels_path=str(EDGE_LABELS),
         preprocessing_path=str(EDGE_PREPROCESSING),
         predict_script=str(
-            REPO_ROOT / "CN/models/edge_deployment/predict.py"
+            REPO_ROOT / "model_share/deploy/predict.py"
         ),
         threads=1
     )
@@ -290,7 +290,7 @@ else:
             if st.button(
                 "Analyze Image",
                 type="primary",
-                use_container_width=True
+                width="stretch"
             ):
 
                 temp_path = None
@@ -337,7 +337,7 @@ else:
 
                     st.dataframe(
                         quality_df,
-                        use_container_width=True,
+                        width="stretch",
                         hide_index=True
                     )
 
@@ -375,7 +375,7 @@ else:
 
                     st.dataframe(
                         format_top3(edge_result["top3"]),
-                        use_container_width=True,
+                        width="stretch",
                         hide_index=True
                     )
 
@@ -476,7 +476,7 @@ else:
 
                     st.dataframe(
                         format_top3(final_result["top3"]),
-                        use_container_width=True,
+                        width="stretch",
                         hide_index=True
                     )
 

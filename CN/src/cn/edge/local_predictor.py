@@ -12,7 +12,7 @@ from typing import Any, Protocol
 from ..errors import ErrorCode, FogError
 from ..schemas import LABELS, validate_result
 
-DEFAULT_EDGE_DIR = Path(__file__).resolve().parents[4] / "models" / "edge_quant"
+DEFAULT_EDGE_DIR = Path(__file__).resolve().parents[4] / "model_share" / "deploy"
 DEFAULT_ONNX_MODEL = DEFAULT_EDGE_DIR / "model_int8.onnx"
 DEFAULT_LABELS = DEFAULT_EDGE_DIR / "labels.json"
 DEFAULT_PREPROCESSING = DEFAULT_EDGE_DIR / "preprocessing.json"
