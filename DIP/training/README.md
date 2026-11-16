@@ -1,7 +1,24 @@
-# DIP/training — Model training, evaluation, and app
+# DIP/training — Model Training, Evaluation, and Application
 
-EfficientNet-B0 training and evaluation for 13-class WBC classification, plus
-the Streamlit application shell.
+EfficientNet-B0 training and evaluation for 13-class WBC classification, integrated
+with the Streamlit-based Edge–Fog inference application.
+
+## Live Application
+
+**Deployed Streamlit App:**
+https://dipcnproject-iznyisdqoq6lr7tjnyw9nu.streamlit.app/
+
+The application allows users to upload WBC images, select a network profile,
+and test the Edge–Fog inference pipeline.
+
+**How to test:**
+1. Open the deployed application.
+2. Upload a WBC cell image.
+3. Select a network profile (Wi-Fi, 5G, or LPWAN), if prompted.
+4. Run the prediction.
+5. View the predicted class, confidence, and routing decision.
+
+**Note:** This is an academic research prototype, not a clinical diagnostic tool.
 
 ## Contents
 
@@ -33,9 +50,16 @@ the Streamlit application shell.
 - Held-out `phase2_test` evaluation (`results/test_final/`).
 - Seven quality-feature tests pass.
 
-**OUT OF SCOPE (application).** `app.py` only validates and previews an uploaded
-image. Quality features, model inference, and top-3 display are not connected.
-Cellpose is not integrated and is not a planned application feature.
+**APPLICATION INTEGRATION AND DEPLOYMENT.** The Streamlit application has been
+integrated with the Edge–Fog inference pipeline and deployed using Streamlit
+Community Cloud. It supports WBC image upload, image-quality analysis, Edge
+inference using the quantized INT8 ONNX model, network-profile selection, and
+routing decisions for local inference or Fog offloading through TCP communication.
+
+Live application:
+https://dipcnproject-iznyisdqoq6lr7tjnyw9nu.streamlit.app/
+
+Cellpose is not integrated into the deployed application.
 
 ## Results
 
