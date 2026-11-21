@@ -1,10 +1,10 @@
-
 import hashlib
 import io
 import subprocess
 import sys
 import tempfile
 import threading
+from time import perf_counter
 from pathlib import Path
 
 import onnxruntime as ort
@@ -103,16 +103,29 @@ FOG_CHECKPOINTS = [
 # --------------------------------------------------
 
 st.set_page_config(
-    page_title="WBC Cancer Detection",
+    page_title="WBC Classification | Edge–Fog AI",
     page_icon="🔬",
     layout="wide"
 )
 
-st.title("🔬 WBC Cancer Detection System")
+st.markdown("""
+<style>
+:root { color-scheme: dark; }
+.stApp, [data-testid="stHeader"] { background: #0d151c; color: #e6f1f4; }
+.stApp h1, .stApp h2, .stApp h3 { color: #e6f1f4; }
+.stApp h1 { font-size: clamp(1.65rem, 4vw, 2.5rem); }
+[data-testid="stMetric"] { background: #16252e; border: 1px solid #29434c; border-radius: .6rem; padding: .75rem; }
+[data-testid="stMetricValue"] { color: #75e3d2; font-size: clamp(1.1rem, 3vw, 1.8rem); }
+[data-testid="stBaseButton-primary"] { background: #75e3d2; border-color: #75e3d2; color: #0d151c; }
+[data-testid="stBaseButton-primary"]:hover { background: #abf6e9; color: #0d151c; }
+[role="progressbar"] > div > div { background-color: #52cbb8; }
+</style>
+""", unsafe_allow_html=True)
+st.title("WBC Classification | Edge–Fog AI")
 
 st.write(
-    "Upload a White Blood Cell image to perform image-quality "
-    "assessment and Edge/Fog-based classification."
+    "13-class white blood cell classification using image quality "
+    "assessment and adaptive Edge–Fog routing."
 )
 
 st.info(
@@ -217,437 +230,247 @@ def load_pipeline():
         "fog_client": fog_client,
         "server": server,
         "server_thread": server_thread,
+        "fog_lock": threading.Lock(),
         "fog_backend": fog_backend
     }
 
 
-# --------------------------------------------------
-# HELPER: TOP-3 PREDICTIONS
-# --------------------------------------------------
-
-def format_top3(items):
-
-    rows = []
-
-    for item in items:
-
-        if isinstance(item, dict):
-            label = item.get(
-                "label",
-                item.get("class", item.get("predicted_class", "Unknown"))
-            )
-
-            score = item.get(
-                "confidence",
-                item.get("probability", item.get("score", 0))
-            )
-
-        else:
-            label, score = item[0], item[1]
-
-        rows.append({
-            "WBC Class": label,
-            "Confidence": round(float(score), 6)
-        })
-
-    return pd.DataFrame(rows)
 
 
-# --------------------------------------------------
-# NETWORK PROFILE
-# --------------------------------------------------
-
-st.divider()
-st.subheader("1. Network Configuration")
-
-profile_options = {
-    "WiFi": "wifi",
-    "5G": "5g",
-    "Poor WiFi": "poor_wifi",
-    "LPWAN": "lpwan"
+PROFILES = {"WiFi": "wifi", "5G": "5g", "Poor WiFi": "poor_wifi", "LPWAN": "lpwan"}
+FEATURES = {
+    "laplacian_variance": ("Laplacian variance", "Variance of the grayscale Laplacian."),
+    "median_filter_residual": ("Median-filter residual", "Mean absolute change after a 3 × 3 median filter."),
+    "brightness": ("Brightness", "Mean grayscale intensity."),
+    "contrast": ("Contrast", "Standard deviation of grayscale intensity."),
+    "extreme_pixel_percentage": ("Extreme pixels (%)", "Percentage of grayscale pixels at or below 5 or at or above 250."),
+    "rgb_colour_variation": ("RGB colour variation", "Mean of the three colour-channel standard deviations."),
+    "edge_density": ("Edge density (%)", "Percentage of pixels detected as edges by Canny at thresholds 100 and 200."),
 }
 
-selected_profile = st.selectbox(
-    "Select network profile",
-    list(profile_options.keys()),
-    index=0,
-    help="The saved learned policy uses this network profile "
-         "to decide whether to use Edge or Fog."
-)
 
-profile_name = profile_options[selected_profile]
-
-st.caption(f"Selected profile: {profile_name}")
+def section(title):
+    st.divider()
+    st.subheader(title)
 
 
-# --------------------------------------------------
-# IMAGE UPLOAD
-# --------------------------------------------------
+def milliseconds(value):
+    return f"{value:,.2f} ms"
 
-st.divider()
-st.subheader("2. Upload WBC Image")
 
-uploaded_file = st.file_uploader(
-    "Choose a WBC image",
-    type=["jpg", "jpeg", "png"],
-    help="Upload a JPG, JPEG or PNG image."
-)
-
-if uploaded_file is None:
-
-    st.info("Please upload a WBC image to continue.")
-
-else:
-
-    try:
-        image_bytes = uploaded_file.getvalue()
-
-        # Verify image
-        image_check = Image.open(io.BytesIO(image_bytes))
-        image_format = image_check.format
-        image_check.verify()
-
-        image = Image.open(
-            io.BytesIO(image_bytes)
-        ).convert("RGB")
-
-        if image.width < 10 or image.height < 10:
-            st.error("Image dimensions are too small.")
-
+def show_top3(items):
+    st.markdown("**Top-3 predictions**")
+    for item in items:
+        if isinstance(item, dict):
+            label = item.get("label", item.get("class", item.get("predicted_class", "Unknown")))
+            score = item.get("confidence", item.get("probability", item.get("score", 0)))
         else:
-
-            st.success("Image uploaded successfully!")
-
-            col1, col2 = st.columns(2)
-
-            with col1:
-                st.image(
-                    image,
-                    caption="Uploaded WBC Image",
-                    width="stretch"
-                )
-
-            with col2:
-                st.write("### Image Information")
-                st.write(f"**File name:** {uploaded_file.name}")
-                st.write(f"**Image format:** {image_format}")
-                st.write(f"**Width:** {image.width} pixels")
-                st.write(f"**Height:** {image.height} pixels")
-                st.write("**Color channels:** 3 (RGB)")
-                st.write(
-                    f"**File size:** {len(image_bytes) / 1024:.2f} KB"
-                )
-
-            st.divider()
-
-            # --------------------------------------------------
-            # ANALYSIS BUTTON
-            # --------------------------------------------------
-
-            if st.button(
-                "Analyze Image",
-                type="primary",
-                width="stretch"
-            ):
-
-                temp_path = None
-
-                try:
-                    # Load all models and start Fog server
-                    pipeline = load_pipeline()
-
-                    edge = pipeline["edge"]
-                    policy = pipeline["policy"]
-                    fog_client = pipeline["fog_client"]
-
-                    # Save uploaded image temporarily
-                    suffix = Path(uploaded_file.name).suffix.lower()
-
-                    if suffix not in [".jpg", ".jpeg", ".png"]:
-                        suffix = ".jpg"
-
-                    with tempfile.NamedTemporaryFile(
-                        suffix=suffix,
-                        delete=False
-                    ) as temp_file:
-
-                        temp_file.write(image_bytes)
-                        temp_path = Path(temp_file.name)
-
-                    st.divider()
-                    st.subheader("3. Image Quality Assessment")
-
-                    # Extract seven quality features
-                    features = extract_image_features(
-                        str(temp_path)
-                    )
-
-                    quality_df = pd.DataFrame(
-                        [
-                            {
-                                "Quality Feature": key,
-                                "Value": round(float(value), 6)
-                            }
-                            for key, value in features.items()
-                        ]
-                    )
-
-                    st.dataframe(
-                        quality_df,
-                        width="stretch",
-                        hide_index=True
-                    )
-
-                    quality = describe_quality(features)
-                    quality_col1, quality_col2 = st.columns(2)
-
-                    quality_col1.metric(
-                        "Estimated appearance",
-                        quality["appearance"]
-                    )
-                    quality_col2.metric(
-                        "Estimated severity band",
-                        quality["severity"]
-                    )
-                    st.caption(
-                        f"{quality['summary']}. Estimated from image-quality features."
-                    )
-
-                    demo_reference = load_demo_reference().get(
-                        Path(uploaded_file.name).stem.zfill(8)
-                    )
-                    if demo_reference is not None:
-                        demo_class, demo_severity = demo_reference
-                        st.info(
-                            f"Filename match in dataset manifest: class **{demo_class}**, "
-                            f"dataset severity **{demo_severity}**."
-                        )
-
-                    # --------------------------------------------------
-                    # EDGE INFERENCE
-                    # --------------------------------------------------
-
-                    st.divider()
-                    st.subheader("4. Edge AI Prediction")
-
-                    with st.spinner("Running local INT8 Edge model..."):
-                        edge_result = edge.predict(str(temp_path))
-
-                    edge_class = edge_result["predicted_class"]
-                    edge_confidence = float(edge_result["confidence"])
-
-                    edge_col1, edge_col2, edge_col3 = st.columns(3)
-
-                    edge_col1.metric(
-                        "Edge predicted class",
-                        edge_class
-                    )
-
-                    edge_col2.metric(
-                        "Edge confidence",
-                        f"{edge_confidence:.4f}"
-                    )
-
-                    edge_col3.metric(
-                        "Edge inference latency",
-                        f"{edge_result['latency_ms']:.2f} ms"
-                    )
-
-                    st.write("**Edge Top-3 predictions**")
-
-                    st.dataframe(
-                        format_top3(edge_result["top3"]),
-                        width="stretch",
-                        hide_index=True
-                    )
-
-                    # --------------------------------------------------
-                    # LEARNED POLICY
-                    # --------------------------------------------------
-
-                    st.divider()
-                    st.subheader("5. Learned Edge/Fog Routing")
-
-                    network_profile = get(profile_name)
-
-                    decision = policy.decide(
-                        features,
-                        edge_result,
-                        network_profile
-                    )
-
-                    action = decision.value.lower()
-
-                    if action == "local":
-
-                        st.success(
-                            "LOCAL: The learned policy selected "
-                            "the Edge prediction."
-                        )
-
-                        final_result = edge_result
-                        prediction_source = "Edge INT8"
-                        total_latency = float(
-                            edge_result["latency_ms"]
-                        )
-
-                        fog_result = None
-
-                    elif action == "offload":
-
-                        st.warning(
-                            "OFFLOAD: The learned policy selected "
-                            "the Fog server."
-                        )
-
-                        with st.spinner(
-                            "Sending image to Fog through TCP..."
-                        ):
-
-                            fog_result = fog_client.classify(
-                                str(temp_path),
-                                image_id=uploaded_file.name
-                            )
-
-                        if not fog_result.get("integrity_ok", False):
-                            raise RuntimeError(
-                                "Fog image integrity verification failed."
-                            )
-
-                        final_result = fog_result
-                        prediction_source = "Fog ensemble"
-                        total_latency = float(
-                            fog_result["total_ms"]
-                        )
-
-                    else:
-                        raise RuntimeError(
-                            f"Unknown routing decision: {action}"
-                        )
-
-                    # --------------------------------------------------
-                    # FINAL RESULT
-                    # --------------------------------------------------
-
-                    st.divider()
-                    st.subheader("6. Final WBC Classification Result")
-
-                    final_class = final_result["predicted_class"]
-                    final_confidence = float(
-                        final_result["confidence"]
-                    )
-
-                    result_col1, result_col2, result_col3 = st.columns(3)
-
-                    result_col1.metric(
-                        "Final predicted class",
-                        final_class
-                    )
-
-                    result_col2.metric(
-                        "Final confidence",
-                        f"{final_confidence:.4f}"
-                    )
-
-                    result_col3.metric(
-                        "Prediction source",
-                        prediction_source
-                    )
-
-                    st.write("**Final Top-3 predictions**")
-
-                    st.dataframe(
-                        format_top3(final_result["top3"]),
-                        width="stretch",
-                        hide_index=True
-                    )
-
-                    # --------------------------------------------------
-                    # PERFORMANCE DETAILS
-                    # --------------------------------------------------
-
-                    st.divider()
-                    st.subheader("7. Performance and Communication")
-
-                    perf_col1, perf_col2 = st.columns(2)
-
-                    perf_col1.metric(
-                        "Selected network",
-                        selected_profile
-                    )
-
-                    perf_col2.metric(
-                        "Total prediction latency",
-                        f"{total_latency:.2f} ms"
-                    )
-
-                    if fog_result is not None:
-
-                        st.write("### TCP Communication Details")
-
-                        tcp_col1, tcp_col2, tcp_col3 = st.columns(3)
-
-                        tcp_col1.metric(
-                            "Upload",
-                            f"{fog_result['upload_ms']:.2f} ms"
-                        )
-
-                        tcp_col2.metric(
-                            "Fog inference",
-                            f"{fog_result['latency_ms']:.2f} ms"
-                        )
-
-                        tcp_col3.metric(
-                            "Download",
-                            f"{fog_result['download_ms']:.2f} ms"
-                        )
-
-                        st.write(
-                            f"**Bytes sent:** "
-                            f"{fog_result['bytes_sent']}"
-                        )
-
-                        st.write(
-                            f"**Bytes received:** "
-                            f"{fog_result['bytes_received']}"
-                        )
-
-                        st.write(
-                            "**TCP image integrity:** Verified"
-                        )
-
-                    else:
-
-                        st.info(
-                            "The image was classified locally. "
-                            "No Fog communication was required."
-                        )
-
-                    st.divider()
-
-                    st.caption(
-                        "Experimental WBC classification system. "
-                        "This result is not a medical diagnosis."
-                    )
-
-                except Exception as e:
-
-                    st.error("Image analysis failed.")
-                    st.exception(e)
-
-                finally:
-
-                    if temp_path is not None and temp_path.exists():
-                        temp_path.unlink()
-
-    except Exception as e:
-
-        st.error(
-            "Unable to read this image. "
-            "Please upload a valid JPG, JPEG or PNG file."
+            label, score = item[:2]
+        st.progress(float(score), text=f"{label} · {float(score):.2%}")
+
+
+def run_analysis(pipeline, image_bytes, image_name, profile_name, suffix):
+    started = perf_counter()
+    with tempfile.TemporaryDirectory() as directory:
+        path = str(Path(directory) / f"image{suffix}")
+        Path(path).write_bytes(image_bytes)
+        with st.spinner("Extracting image quality features..."):
+            features = extract_image_features(path)
+            quality = describe_quality(features)
+        with st.spinner("Running the Edge INT8 model..."):
+            edge = pipeline["edge"].predict(path)
+            decision = pipeline["policy"].decide(features, edge, get(profile_name))
+
+        action = decision.value.lower()
+        fog = None
+        fog_error = None
+        if action == "offload":
+            try:
+                with st.spinner("Sending the image to Fog over localhost TCP..."):
+                    with pipeline["fog_lock"]:
+                        fog = pipeline["fog_client"].classify(path, image_id=image_name)
+                    if not fog.get("integrity_ok", False):
+                        raise RuntimeError("Image integrity verification failed.")
+            except Exception as error:
+                fog = None
+                fog_error = str(error)
+        elif action != "local":
+            raise RuntimeError(f"Unknown routing decision: {action}")
+
+        pipeline_ms = (perf_counter() - started) * 1000.0
+
+    return {
+        "features": features,
+        "quality": quality,
+        "edge": edge,
+        "action": action,
+        "fog": fog,
+        "fog_error": fog_error,
+        "pipeline_ms": pipeline_ms,
+    }
+
+
+def show_analysis(analysis, selected_profile, image_name):
+    section("3. Image Quality Assessment")
+    rows = [
+        {"Quality feature": label, "Value": analysis["features"][key]}
+        for key, (label, _) in FEATURES.items()
+    ]
+    st.dataframe(
+        pd.DataFrame(rows),
+        hide_index=True,
+        width="stretch",
+        column_config={"Value": st.column_config.NumberColumn(format="%.6f")},
+    )
+    with st.expander("Feature definitions"):
+        for label, definition in FEATURES.values():
+            st.markdown(f"**{label}** · {definition}")
+    quality = analysis["quality"]
+    appearance, severity = st.columns(2)
+    appearance.metric("Estimated appearance", quality["appearance"])
+    severity.metric("Estimated severity band", quality["severity"])
+    st.caption(f"{quality['summary']}. Estimated from image-quality features.")
+    reference = load_demo_reference().get(Path(image_name).stem.zfill(8))
+    if reference is not None:
+        demo_class, demo_severity = reference
+        st.info(
+            f"Filename match in dataset manifest: class **{demo_class}**, "
+            f"dataset severity **{demo_severity}**."
         )
 
-        st.exception(e)
+    section("4. Edge AI Prediction")
+    edge = analysis["edge"]
+    st.caption("EfficientNet-B0 INT8 · ONNX")
+    edge_class, edge_score, edge_time = st.columns(3)
+    edge_class.metric("Predicted class", edge["predicted_class"])
+    edge_score.metric("Confidence", f"{edge['confidence']:.2%}")
+    edge_time.metric("Edge inference", milliseconds(edge["latency_ms"]))
+    show_top3(edge["top3"])
+
+    section("5. Learned Edge/Fog Routing")
+    local = analysis["action"] == "local"
+    source = "Edge INT8" if local else "Fog ensemble"
+    route = "LOCAL" if local else "OFFLOAD"
+    st.info(f"**{route} · {source}**")
+    if local:
+        st.caption("Image quality → Edge INT8 → Learned policy → Edge result")
+    else:
+        st.caption("Image quality → Edge INT8 → Learned policy → Localhost TCP → Fog ensemble")
+
+    section("6. Final WBC Classification Result")
+    st.info("Research use only. This experimental prediction is not a medical diagnosis.")
+    fog = analysis["fog"]
+    final = edge if local else fog
+    if final is None:
+        st.error(f"Fog classification failed on localhost TCP (127.0.0.1). {analysis['fog_error']}")
+    else:
+        with st.container(border=True):
+            final_class, confidence, prediction_source = st.columns(3)
+            final_class.metric("WBC class", final["predicted_class"])
+            confidence.metric("Confidence", f"{final['confidence']:.2%}")
+            prediction_source.metric("Prediction source", source)
+            show_top3(final["top3"])
+        st.caption(
+            "Confidence is the model’s score for the selected class. "
+            "Lower scores indicate more uncertainty."
+        )
+
+    section("7. Performance and Communication")
+    st.caption(f"Predefined network profile · {selected_profile}")
+    edge_timing, fog_timing, pipeline_timing = st.columns(3)
+    edge_timing.metric("Edge inference", milliseconds(edge["latency_ms"]))
+    if fog is not None:
+        fog_timing.metric("TCP/Fog exchange", milliseconds(fog["total_ms"]))
+    if final is not None:
+        pipeline_timing.metric("Analysis pipeline", milliseconds(analysis["pipeline_ms"]))
+        st.caption(
+            "Pipeline time is measured from preparing the validated upload for analysis "
+            "through the final result. It includes quality extraction, Edge inference, "
+            "routing, and any Fog call. Model startup, upload to Streamlit, "
+            "image validation, and page rendering are outside this timer."
+        )
+
+    if local:
+        st.info("No Fog communication was required.")
+    elif fog is not None:
+        st.markdown("**TCP communication · Localhost (127.0.0.1)**")
+        upload, inference, download = st.columns(3)
+        upload.metric("Upload", milliseconds(fog["upload_ms"]))
+        inference.metric("Fog inference", milliseconds(fog["latency_ms"]))
+        download.metric("Download (derived)", milliseconds(fog["download_ms"]))
+        st.caption(
+            "The TCP client times the exchange from the file metadata request through "
+            "the verified result. Download is calculated from the exchange time after "
+            "subtracting upload and server processing."
+        )
+        sent, received, integrity = st.columns(3)
+        sent.metric("Bytes sent", f"{fog['bytes_sent']:,d}")
+        received.metric("Bytes received", f"{fog['bytes_received']:,d}")
+        integrity.metric("TCP image integrity", "Verified")
+
+
+section("1. Network Configuration")
+selected_profile = st.selectbox(
+    "Network profile",
+    list(PROFILES),
+    help="Predefined inputs to the learned routing policy. These profiles do not measure your connection.",
+)
+profile_name = PROFILES[selected_profile]
+
+section("2. Upload WBC Image")
+uploaded_file = st.file_uploader("Choose a WBC image", type=["jpg", "jpeg", "png"])
+st.session_state.setdefault("wbc_analysis", None)
+
+if uploaded_file is None:
+    st.session_state.wbc_analysis = None
+    st.info("Upload a JPG or PNG image to continue.")
+else:
+    image_bytes = uploaded_file.getvalue()
+    image_name = uploaded_file.name
+    input_key = (hashlib.sha256(image_bytes).hexdigest(), image_name, profile_name)
+    saved = st.session_state.wbc_analysis
+    if saved is not None and saved["key"] != input_key:
+        st.session_state.wbc_analysis = None
+
+    try:
+        with Image.open(io.BytesIO(image_bytes)) as check:
+            image_format = check.format
+            if image_format not in {"JPEG", "PNG"}:
+                raise ValueError("Choose a JPEG or PNG image.")
+            if min(check.size) < 10:
+                raise ValueError("The image must be at least 10 × 10 pixels.")
+            check.verify()
+        with Image.open(io.BytesIO(image_bytes)) as original:
+            image = original.convert("RGB")
+    except (OSError, SyntaxError, ValueError, Image.DecompressionBombError) as error:
+        st.session_state.wbc_analysis = None
+        st.error(f"Unable to read the uploaded image. {error}")
+    else:
+        preview = image.copy()
+        preview.thumbnail((300, 240))
+        with st.container(border=True):
+            preview_column, file_column = st.columns(2)
+            preview_column.image(preview, caption="Uploaded WBC image")
+            file_column.text(image_name)
+            file_column.write(f"{image.width} × {image.height} px · {image_format}")
+            file_column.caption(f"RGB preview · {len(image_bytes):,d} bytes")
+        if st.button("Analyze Image", type="primary"):
+            st.session_state.wbc_analysis = None
+            try:
+                pipeline = load_pipeline()
+            except Exception as error:
+                st.error(f"Unable to initialize the Edge and Fog models or the TCP server. {error}")
+            else:
+                suffix = ".png" if image_format == "PNG" else ".jpg"
+                try:
+                    result = run_analysis(pipeline, image_bytes, image_name, profile_name, suffix)
+                except Exception as error:
+                    st.error(f"Image analysis failed. {error}")
+                else:
+                    st.session_state.wbc_analysis = {"key": input_key, "result": result}
+
+        if st.session_state.wbc_analysis is not None:
+            show_analysis(st.session_state.wbc_analysis["result"], selected_profile, image_name)
 
 st.divider()
 st.caption(
