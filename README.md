@@ -1,29 +1,45 @@
-# WBC DIP–CN Project
+# A Robust 13-Class White Blood Cell Classification System with Edge–Fog Offloading for Resource-Constrained Cancer Screening
 
-13-class White Blood Cell (WBC) classification for cancer screening on
-**WBCBench 2026**, built as a Digital Image Processing (DIP) and Computer
-Networks (CN) project.
+**A. Haneeth** — Department of Artificial Intelligence and Data Science  
+**Nivrutha Varshini** — Department of Computer Science and Engineering  
+IIIT Raichur, India  
+Guides: Dr. Mehbub Alam, Dr. Koushiki Roy
 
-- **Team:** A. Haneeth, Nivrutha Varshini
-- **Guides:** Dr. Mehbub Alam, Dr. Koushiki Roy
-- **Institution:** IIIT Raichur
-- **Repository:** https://github.com/Haneeth-A/DIP_CN_PROJECT
+**Submission artifact — WBCBench 2026 / DIP–CN project**
 
-## Live application
+---
 
-**Streamlit deployment:**
-https://dipcnproject-iznyisdqoq6lr7tjnyw9nu.streamlit.app/
+## Abstract
 
-The application supports:
+White blood cell (WBC) differential counting is a routine but labour-intensive step in haematology and cancer screening. Automated classifiers must handle fine-grained morphology, severe class imbalance, image degradation, and limited compute at the point of care. We present an integrated digital image processing and computer networks system for 13-class WBC classification on WBCBench 2026. The classifier is an EfficientNet-B0 trained on mixed pristine and degraded images with focal loss and a square-root sampler, followed by eight-view test-time augmentation (TTA) and a top-3 ensemble. On *phase2_eval*, the best single model reaches **0.7144 macro-F1** and **0.9294 accuracy**; the ensemble reaches **0.7325** and **0.9405**. On the held-out *phase2_test*, the corresponding values are **0.6811/0.9474** and **0.7037/0.9591**. Five-fold cross-validation on the training pool gives **0.8461 ± 0.0114** macro-F1. A descriptive analysis of seven image-quality features shows that the supplied severity labels mix noise-like and blur-like degradation, so the features are used for quality-aware routing rather than for a fixed restoration stage. Static INT8 quantization reduces the model from 16.09 MB to 4.90 MB and latency from 11.61 ms to 6.39 ms on one CPU thread, at a cost of 0.106 macro-F1. A learned local/offload policy reaches **0.870 accuracy at about 30 ms** on WiFi/5G, versus **0.914 at about 484–491 ms** for always-offload; its error-aware cost is 160.2–160.4 ms versus 165.2 ms for always-local. It stays local on a low-power wide-area network (LPWAN). Real-TCP validation passed **20/20 requests** with **100% SHA-256 integrity** and a maximum latency error of 4.50%. A Cellpose segmentation experiment is reported as a negative result: the best crop classifier reached 0.7067 macro-F1, below the full-image model. Rare classes remain the main bottleneck.
 
-- WBC image upload and preview
-- Seven image-quality feature measurements
-- INT8 Edge inference with an ONNX model
-- Learned Edge/Fog routing by network profile
-- Fog ensemble inference over a real local TCP connection
-- Top-3 predictions, confidence, latency, and TCP integrity details
+**Keywords:** white blood cell classification; class imbalance; image degradation; EfficientNet-B0; INT8 quantization; edge–fog computing; adaptive offloading; Cellpose.
 
-> This is an academic research prototype. It is not a clinical diagnostic tool.
+---
+
+## Main results
+
+| Evaluation | Model | Accuracy | Balanced acc. | Macro-F1 | Weighted-F1 |
+|---|---|---:|---:|---:|---:|
+| *phase2_eval* | Best single | 0.9294 | 0.7114 | 0.7144 | 0.9300 |
+| *phase2_eval* | Top-3 TTA ensemble | 0.9405 | 0.7242 | 0.7325 | 0.9396 |
+| *phase2_test* | Best single | 0.9474 | 0.7104 | 0.6811 | 0.9502 |
+| *phase2_test* | Top-3 TTA ensemble | 0.9591 | 0.7115 | 0.7037 | 0.9599 |
+| 5-fold CV | Training pool | 0.9490 ± 0.0037 | — | 0.8461 ± 0.0114 | — |
+
+| Edge–fog result | Value |
+|---|---:|
+| Always-local accuracy / latency | 0.848 / 13.2 ms |
+| Learned policy accuracy / latency | 0.870 / 30.2–30.4 ms |
+| Always-fog accuracy / latency | 0.914 / 484–491 ms |
+| Oracle accuracy / latency | 0.926 / 50.2–50.7 ms |
+| Learned policy error-aware cost | 160.2–160.4 ms |
+| Always-local error-aware cost | 165.2 ms |
+| Real-TCP success and integrity | 20/20, 100% |
+
+The routing objective is **error-aware cost = latency + 1,000 ms × 1[error]**, not raw latency. The learned policy captures about one-third of the accuracy gap between local and fog, adds about 17 ms over local, and avoids roughly 455 ms of fog latency on WiFi/5G.
+
+---
 
 ## System overview
 
@@ -38,107 +54,67 @@ Quality features ──> Learned routing policy ──> Edge INT8 prediction
 
 - **DIP model:** EfficientNet-B0, 13 WBC classes.
 - **Edge model:** static INT8 ONNX, CPU inference, no PyTorch needed.
-- **Fog model:** three-checkpoint EfficientNet ensemble with 8-view TTA.
-- **Routing:** a learned policy selects local Edge inference or Fog offload
-  using image quality, Edge confidence, and network-profile features.
-- **Transport:** framed TCP with SHA-256 image integrity, ACK/retransmit, and a
-  threaded Fog server.
+- **Fog model:** three-checkpoint EfficientNet ensemble with eight-view TTA.
+- **Routing:** a depth-4 decision tree selects local Edge inference or Fog offload using image quality, Edge confidence, and network-profile features.
+- **Transport:** framed TCP with SHA-256 image integrity, ACK/retransmit, and a threaded Fog server.
 
-## Main results
+---
 
-| Evaluation | Model | Macro-F1 | Accuracy |
-|---|---|---:|---:|
-| `phase2_eval` | best single | **0.7144** | 0.9294 |
-| `phase2_eval` | top-3 TTA ensemble | **0.7325** | 0.9405 |
-| `phase2_test` | best single | **0.6811** | 0.9474 |
-| `phase2_test` | top-3 TTA ensemble | **0.7037** | 0.9591 |
-
-- **Edge INT8:** accuracy 0.8901, macro-F1 0.6090, 6.39 ms/image on one CPU
-  thread.
-- **CN policy:** always-local 0.848, always-Fog 0.914, learned policy 0.870,
-  oracle 0.926 on the 500-image evaluation split.
-- **TCP validation:** 20/20 successful requests with 100% SHA-256 integrity.
-- **5-fold CV:** mean macro-F1 0.8461 ± 0.0114 on held-out training-pool folds;
-  not directly comparable to `phase2_eval` or `phase2_test`.
-- **Cellpose experiment:** negative result (best crop classifier 0.7067 versus
-  0.7144 full-image). Cellpose is retained as evidence but is not integrated
-  into the deployed application.
-
-## Repository layout
+## Submission contents
 
 | Path | Contents |
 |---|---|
-| `DIP/training/app.py` | Streamlit application entry point |
-| `DIP/training/src/` | Quality features, data, model, and training modules |
+| `DIP/training/app.py` | Streamlit demonstration entry point |
+| `DIP/training/src/` | Quality features, data, model, training, and evaluation modules |
 | `DIP/training/checkpoints/` | Three runtime Fog ensemble checkpoints |
-| `DIP/training/results/` | Training, validation, test, ensemble, and 5-fold outputs |
+| `DIP/training/data/manifests/` | Image-level manifests and fold assignments |
+| `DIP/training/results/` | Final training, validation, test, ensemble, and 5-fold metrics |
 | `DIP/cellpose/` | Cellpose negative-result experiment and evidence |
-| `CN/src/cn/` | TCP transport, Fog backend, Edge predictor, and routing policy |
-| `CN/results/cn_edge_fog/` | Policy matrix, TCP validation, and figures |
+| `CN/src/` | TCP transport, Fog backend, Edge predictor, and routing policy |
+| `CN/results/cn_edge_fog/` | Policy matrix, TCP validation, selected figures, and policy tree |
 | `CN/tests/` | Transport, backend, policy, and integration tests |
 | `model_share/deploy/` | Quantized INT8 ONNX model and deployment wrapper |
-| `model_share/SHA256SUMS` | Checksums for the submitted model bundle |
-| `model_share/results/` | Edge/Fog evaluation outputs |
-| `feature_analysis/` | Quality-feature CSVs, severity analysis, and notebook |
-| `docs/` | Architecture, test report, experiments, and CN technical notes |
+| `model_share/results/` | Edge/Fog evaluation metrics and latency records |
+| `feature_analysis/` | Quality-feature extraction code, manifests, and severity summaries |
 
-## Run locally
+Dataset images are **not** included. `phase2_test` is reserved for final evaluation and was not used for tuning. The official `patient_hash` metadata was not downloaded, so patient-level leakage remains unverified; the five-fold cross-validation is image-level.
 
-Use the existing Python 3.10 environment at `DIP/training/.venv`.
+---
 
-```bash
-cd "/path/to/Project_DIP"
-DIP/training/.venv/bin/python -m streamlit run DIP/training/app.py
-```
+## Evaluation
 
-Open `http://localhost:8501`, upload a JPG/JPEG/PNG WBC image, and select a
-network profile:
-
-- **WiFi / 5G** usually keeps inference on the Edge.
-- **Poor WiFi / LPWAN** can trigger Fog offload through TCP.
-
-## Tests
+Install the Python 3.10 dependencies and run the unit checks:
 
 ```bash
-# DIP quality-feature tests
+pip install -r DIP/training/requirements.txt
+pip install -r model_share/requirements.txt
+
 cd DIP/training
-PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m pytest -q tests -p no:cacheprovider
+PYTHONDONTWRITEBYTECODE=1 python -m pytest -q tests -p no:cacheprovider
 
-# CN transport, backend, and policy tests
-cd CN
-PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src ../DIP/training/.venv/bin/python \
-  -m pytest -q -p no:cacheprovider
+cd ../../CN
+PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python -m pytest -q -p no:cacheprovider
 ```
 
-Some tests skip automatically when the non-redistributable dataset is absent.
+The Streamlit demonstration can be started with:
+
+```bash
+python -m streamlit run DIP/training/app.py
+```
+
+---
 
 ## Data and licence
 
-`DATA/` and `DIP/DATA_CELLPOSE/` contain dataset-derived images and are not
-included in this repository. The dataset is
+The dataset is WBCBench 2026, available at
 [`Xin-Tian/wbcbench2026`](https://huggingface.co/datasets/Xin-Tian/wbcbench2026).
-
-Do not commit or redistribute dataset-derived images. `phase2_test` is reserved
-for final evaluation and must not be used for tuning. Patient-level leakage
-remains unverified because the official `patient_hash` metadata was not
-downloaded.
-
-## Documentation
-
-- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — system design and invariants
-- [`docs/TEST_REPORT.md`](docs/TEST_REPORT.md) — verification evidence
-- [`docs/EXPERIMENTS_REPORT.md`](docs/EXPERIMENTS_REPORT.md) — training and
-  evaluation details
-- [`docs/CN_TCP_API.md`](docs/CN_TCP_API.md) — transport contract
-- [`docs/CN_EDGE_POLICY.md`](docs/CN_EDGE_POLICY.md) — Edge/Fog policy details
-- [`docs/CN_EDGE_PHASE2_REPORT.md`](docs/CN_EDGE_PHASE2_REPORT.md) — Phase 2
-  Edge–Fog report
-- [`docs/CN_RESULTS.md`](docs/CN_RESULTS.md) — Edge–Fog results summary
+Dataset-derived images must not be redistributed. This repository contains only
+code, manifests, model checkpoints, and evaluation outputs.
 
 ## Known limitations
 
-- Rare classes PC/PLY/BNE dominate the remaining classification error.
+- Rare classes PC, PLY, and BNE dominate the remaining classification error.
 - The INT8 Edge model trades macro-F1 for lower latency.
-- The 5-fold CV is image-level, not patient-safe.
-- Cellpose segmentation did not improve classification and is not integrated.
+- The five-fold cross-validation is image-level, not patient-safe.
+- Cellpose segmentation did not improve classification and is not integrated into the deployed path.
 - Device/phone latency benchmarking has not been recorded.

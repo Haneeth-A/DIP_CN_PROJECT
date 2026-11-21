@@ -43,6 +43,10 @@ DIP/cellpose/pilot_complete_results/
 
 # Archive, local-only paper, and large bundles
 DUMP/
-paper/
+paper/*
 DIP/DIP_WBC_2026_submission.zip*
 WBC_App_Dev_Bundle_*
+
+# Local presentation work and large derived pairing table
+files/
+feature_analysis/WBC_Quality_Feature_CSVs/degraded_to_pristine_mapping.csv
