@@ -7,6 +7,8 @@ Guides: Dr. Mehbub Alam, Dr. Koushiki Roy
 
 **Submission artifact — WBCBench 2026 / DIP–CN project**
 
+**Live deployment:** https://dipcnproject-iznyisdqoq6lr7tjnyw9nu.streamlit.app/
+
 ---
 
 ## Abstract
