@@ -11,14 +11,6 @@ Guides: Dr. Mehbub Alam, Dr. Koushiki Roy
 
 ---
 
-## Abstract
-
-White blood cell (WBC) differential counting is a routine but labour-intensive step in haematology and cancer screening. Automated classifiers must handle fine-grained morphology, severe class imbalance, image degradation, and limited compute at the point of care. We present an integrated digital image processing and computer networks system for 13-class WBC classification on WBCBench 2026. The classifier is an EfficientNet-B0 trained on mixed pristine and degraded images with focal loss and a square-root sampler, followed by eight-view test-time augmentation (TTA) and a top-3 ensemble. On *phase2_eval*, the best single model reaches **0.7144 macro-F1** and **0.9294 accuracy**; the ensemble reaches **0.7325** and **0.9405**. On the held-out *phase2_test*, the corresponding values are **0.6811/0.9474** and **0.7037/0.9591**. Five-fold cross-validation on the training pool gives **0.8461 ± 0.0114** macro-F1. A descriptive analysis of seven image-quality features shows that the supplied severity labels mix noise-like and blur-like degradation, so the features are used for quality-aware routing rather than for a fixed restoration stage. Static INT8 quantization reduces the model from 16.09 MB to 4.90 MB and latency from 11.61 ms to 6.39 ms on one CPU thread, at a cost of 0.106 macro-F1. A learned local/offload policy reaches **0.870 accuracy at about 30 ms** on WiFi/5G, versus **0.914 at about 484–491 ms** for always-offload; its error-aware cost is 160.2–160.4 ms versus 165.2 ms for always-local. It stays local on a low-power wide-area network (LPWAN). Real-TCP validation passed **20/20 requests** with **100% SHA-256 integrity** and a maximum latency error of 4.50%. A Cellpose segmentation experiment is reported as a negative result: the best crop classifier reached 0.7067 macro-F1, below the full-image model. Rare classes remain the main bottleneck.
-
-**Keywords:** white blood cell classification; class imbalance; image degradation; EfficientNet-B0; INT8 quantization; edge–fog computing; adaptive offloading; Cellpose.
-
----
-
 ## Main results
 
 | Evaluation | Model | Accuracy | Balanced acc. | Macro-F1 | Weighted-F1 |
