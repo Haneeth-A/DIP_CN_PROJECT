@@ -104,6 +104,11 @@ The Streamlit demonstration can be started with:
 python -m streamlit run DIP/training/app.py
 ```
 
+The app shows a heuristic estimate of image appearance and degradation severity.
+When an uploaded filename matches a dataset image ID, it also shows the manifest
+class and severity. Demo images are kept locally. The footer shows the Git
+commit, full Edge model SHA-256, and ONNX Runtime and Pillow versions.
+
 ---
 
 ## Data and licence

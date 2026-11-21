@@ -1,12 +1,16 @@
 
-import sys
+import hashlib
 import io
+import subprocess
+import sys
 import tempfile
 import threading
 from pathlib import Path
 
-import streamlit as st
+import onnxruntime as ort
 import pandas as pd
+import PIL
+import streamlit as st
 from PIL import Image
 
 # --------------------------------------------------
@@ -30,6 +34,58 @@ EDGE_PREPROCESSING = (
 POLICY_PATH = (
     REPO_ROOT / "CN/results/cn_edge_fog/policy_tree.joblib"
 )
+
+
+def _sha256(path: Path) -> str:
+    if not path.is_file():
+        return "missing"
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _git_commit() -> str:
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=REPO_ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=2,
+        )
+        return result.stdout.strip() or "unknown"
+    except Exception:
+        return "unknown"
+
+
+EDGE_MODEL_SHA256 = _sha256(EDGE_MODEL)
+GIT_COMMIT = _git_commit()
+MANIFEST_PATH = REPO_ROOT / "DIP/training/data/manifests/quality_features.csv"
+
+
+@st.cache_data(show_spinner=False)
+def load_demo_reference() -> dict[str, tuple[str, str]]:
+    if not MANIFEST_PATH.is_file():
+        return {}
+    try:
+        frame = pd.read_csv(
+            MANIFEST_PATH,
+            usecols=["image_id", "class_label", "severity_label"],
+            dtype={"image_id": str},
+        )
+    except Exception:
+        return {}
+    return {
+        str(row.image_id).zfill(8): (
+            str(row.class_label),
+            str(row.severity_label),
+        )
+        for row in frame.itertuples(index=False)
+    }
+
 
 FOG_CHECKPOINTS = [
     REPO_ROOT / "DIP/training/checkpoints/"
@@ -76,6 +132,7 @@ try:
     from cn.server import FogServer
     from cn.fog_backend import TorchFogBackend
 
+    from quality.degradation import describe_quality
     from quality.features import extract_image_features
 
 except Exception as e:
@@ -341,6 +398,31 @@ else:
                         hide_index=True
                     )
 
+                    quality = describe_quality(features)
+                    quality_col1, quality_col2 = st.columns(2)
+
+                    quality_col1.metric(
+                        "Estimated appearance",
+                        quality["appearance"]
+                    )
+                    quality_col2.metric(
+                        "Estimated severity band",
+                        quality["severity"]
+                    )
+                    st.caption(
+                        f"{quality['summary']}. Estimated from image-quality features."
+                    )
+
+                    demo_reference = load_demo_reference().get(
+                        Path(uploaded_file.name).stem.zfill(8)
+                    )
+                    if demo_reference is not None:
+                        demo_class, demo_severity = demo_reference
+                        st.info(
+                            f"Filename match in dataset manifest: class **{demo_class}**, "
+                            f"dataset severity **{demo_severity}**."
+                        )
+
                     # --------------------------------------------------
                     # EDGE INFERENCE
                     # --------------------------------------------------
@@ -566,3 +648,9 @@ else:
         )
 
         st.exception(e)
+
+st.divider()
+st.caption(
+    f"Build `{GIT_COMMIT}` | Edge model SHA-256 `{EDGE_MODEL_SHA256}` | "
+    f"onnxruntime {ort.__version__} | Pillow {PIL.__version__}"
+)
