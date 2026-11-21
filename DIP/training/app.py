@@ -338,26 +338,18 @@ def show_analysis(analysis, selected_profile, image_name):
             f"dataset severity **{demo_severity}**."
         )
 
-    section("4. Edge AI Prediction")
     edge = analysis["edge"]
-    st.caption("EfficientNet-B0 INT8 · ONNX")
-    edge_class, edge_score, edge_time = st.columns(3)
-    edge_class.metric("Predicted class", edge["predicted_class"])
-    edge_score.metric("Confidence", f"{edge['confidence']:.2%}")
-    edge_time.metric("Edge inference", milliseconds(edge["latency_ms"]))
-    show_top3(edge["top3"])
-
-    section("5. Learned Edge/Fog Routing")
+    section("4. Learned Edge/Fog Routing")
     local = analysis["action"] == "local"
     source = "Edge INT8" if local else "Fog ensemble"
     route = "LOCAL" if local else "OFFLOAD"
-    st.info(f"**{route} · {source}**")
+    st.info(f"**{route} · {source}** · {selected_profile}")
     if local:
         st.caption("Image quality → Edge INT8 → Learned policy → Edge result")
     else:
         st.caption("Image quality → Edge INT8 → Learned policy → Localhost TCP → Fog ensemble")
 
-    section("6. Final WBC Classification Result")
+    section("5. Final WBC Classification Result")
     st.info("Research use only. This experimental prediction is not a medical diagnosis.")
     fog = analysis["fog"]
     final = edge if local else fog
@@ -375,7 +367,15 @@ def show_analysis(analysis, selected_profile, image_name):
             "Lower scores indicate more uncertainty."
         )
 
-    section("7. Performance and Communication")
+    with st.expander("Edge prediction used for routing"):
+        st.caption("The learned policy uses the Edge INT8 prediction for every image.")
+        edge_class, edge_score, edge_time = st.columns(3)
+        edge_class.metric("Edge class", edge["predicted_class"])
+        edge_score.metric("Edge confidence", f"{edge['confidence']:.2%}")
+        edge_time.metric("Edge inference", milliseconds(edge["latency_ms"]))
+        show_top3(edge["top3"])
+
+    section("6. Performance and Communication")
     st.caption(f"Predefined network profile · {selected_profile}")
     edge_timing, fog_timing, pipeline_timing = st.columns(3)
     edge_timing.metric("Edge inference", milliseconds(edge["latency_ms"]))

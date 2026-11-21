@@ -41,6 +41,8 @@ class Predictor:
         options.inter_op_num_threads = int(threads)
         options.execution_mode = ort.ExecutionMode.ORT_SEQUENTIAL
         options.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
+        # Avoid U8S8 accumulator saturation on x64 CPUs without VNNI.
+        options.add_session_config_entry("session.x64quantprecision", "1")
         self.session = ort.InferenceSession(
             str(self.model_path),
             sess_options=options,
